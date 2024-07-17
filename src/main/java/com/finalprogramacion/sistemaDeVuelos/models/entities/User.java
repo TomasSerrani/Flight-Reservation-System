@@ -1,4 +1,4 @@
-package com.finalprogramacion.sistemaDeVuelos.models;
+package com.finalprogramacion.sistemaDeVuelos.models.entities;
 
 import jakarta.persistence.*;
 import lombok.Getter;

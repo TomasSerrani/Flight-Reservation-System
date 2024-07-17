@@ -1,18 +1,16 @@
-package com.finalprogramacion.sistemaDeVuelos.models;
+package com.finalprogramacion.sistemaDeVuelos.models.entities;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.sql.Date;
-
-@NoArgsConstructor
 @Getter
 @Setter
+@NoArgsConstructor
 @Entity
-@Table(name = "reservations")
-public class Reservation {
+@Table(name = "payments")
+public class Payment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -20,25 +18,29 @@ public class Reservation {
     @Column(name = "number", unique = true)
     private Long number;
 
-    @Column(name = "date")
-    private Date date;
+    @Column(name = "type")
+    private String type;
 
     @Column(name = "state")
     private String state;
+
+    @Column(name = "amount_of_payments")
+    private int amountOfPayments;
 
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
     @OneToOne(mappedBy = "payment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Payment payment;
+    private Reservation reservation;
 
-    public Reservation(Long id, Long number, Date date, String state, User user, Payment payment) {
+    public Payment(Long id, Long number, String type, String state, int amountOfPayments, User user, Reservation reservation) {
         this.id = id;
         this.number = number;
-        this.date = date;
+        this.type = type;
         this.state = state;
+        this.amountOfPayments = amountOfPayments;
         this.user = user;
-        this.payment = payment;
+        this.reservation = reservation;
     }
 }
