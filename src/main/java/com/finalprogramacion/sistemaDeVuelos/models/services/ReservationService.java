@@ -1,7 +1,9 @@
 package com.finalprogramacion.sistemaDeVuelos.models.services;
 
 import com.finalprogramacion.sistemaDeVuelos.models.entities.Reservation;
+import com.finalprogramacion.sistemaDeVuelos.models.entities.User;
 import com.finalprogramacion.sistemaDeVuelos.models.services.repositories.ReservationRepository;
+import com.finalprogramacion.sistemaDeVuelos.models.services.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +15,9 @@ public class ReservationService {
 
     @Autowired
     private ReservationRepository reservationRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     public List<Reservation> getAllReservations() {
         return reservationRepository.findAll();
@@ -45,5 +50,10 @@ public class ReservationService {
             return true;
         }
             return false;
+    }
+
+    public List<Reservation> getUserReservations(Long id){
+        User user= userRepository.getReferenceById(id);
+        return user.getReservations();
     }
 }

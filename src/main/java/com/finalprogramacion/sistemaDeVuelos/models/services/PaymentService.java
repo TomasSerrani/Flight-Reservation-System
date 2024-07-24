@@ -1,7 +1,10 @@
 package com.finalprogramacion.sistemaDeVuelos.models.services;
 
 import com.finalprogramacion.sistemaDeVuelos.models.entities.Payment;
+import com.finalprogramacion.sistemaDeVuelos.models.entities.Reservation;
+import com.finalprogramacion.sistemaDeVuelos.models.entities.User;
 import com.finalprogramacion.sistemaDeVuelos.models.services.repositories.PaymentRepository;
+import com.finalprogramacion.sistemaDeVuelos.models.services.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +16,10 @@ public class PaymentService {
 
     @Autowired
     private PaymentRepository paymentRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
     public List<Payment> getAllPayments() {
         return paymentRepository.findAll();
     }
@@ -46,5 +53,10 @@ public class PaymentService {
             return true;
         }
             return false;
+    }
+
+    public List<Payment> getUserPayments(Long id){
+        User user= userRepository.getReferenceById(id);
+        return user.getPayments();
     }
 }

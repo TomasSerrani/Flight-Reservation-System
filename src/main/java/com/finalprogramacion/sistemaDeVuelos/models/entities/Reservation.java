@@ -30,15 +30,21 @@ public class Reservation {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
-    @OneToOne(mappedBy = "payment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne
+    @JoinColumn(name = "payment_id")
     private Payment payment;
 
-    public Reservation(Long id, Long number, Date date, String state, User user, Payment payment) {
+    @ManyToOne
+    @JoinColumn(name = "flight_id", referencedColumnName = "id")
+    private Flight flight;
+
+    public Reservation(Long id, Long number, Date date, String state, User user, Payment payment, Flight flight) {
         this.id = id;
         this.number = number;
         this.date = date;
         this.state = state;
         this.user = user;
         this.payment = payment;
+        this.flight = flight;
     }
 }

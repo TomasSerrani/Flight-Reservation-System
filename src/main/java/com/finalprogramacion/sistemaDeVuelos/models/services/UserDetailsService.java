@@ -5,6 +5,7 @@ import com.finalprogramacion.sistemaDeVuelos.models.services.repositories.UserDe
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+
 import java.util.List;
 import java.util.Optional;
 
@@ -47,5 +48,13 @@ public class UserDetailsService {
             return true;
         }
             return false;
+    }
+
+    public UserDetails authenticate(String email, String password) {
+        UserDetails userDetails = userDetailsRepository.findByEmail(email);
+        if (userDetails != null && userDetails.getPassword().equals(password)) {
+            return userDetails;
+        }
+        return null;
     }
 }

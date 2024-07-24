@@ -45,4 +45,10 @@ public class User {
     public User(UserDetails userDetails) {
         this.userDetails = userDetails;
     }
+
+    public User(String name, Date dateOfBirth, UserDetails userDetails) {
+        this.name = name;
+        this.dateOfBirth = dateOfBirth;
+        this.userDetails = userDetails;
+    }
 }

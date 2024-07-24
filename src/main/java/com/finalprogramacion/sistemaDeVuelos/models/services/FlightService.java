@@ -1,10 +1,14 @@
 package com.finalprogramacion.sistemaDeVuelos.models.services;
 
+import com.finalprogramacion.sistemaDeVuelos.models.entities.Airport;
 import com.finalprogramacion.sistemaDeVuelos.models.entities.Flight;
+import com.finalprogramacion.sistemaDeVuelos.models.services.repositories.AirportRepository;
 import com.finalprogramacion.sistemaDeVuelos.models.services.repositories.FlightRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,7 +18,12 @@ public class FlightService {
     @Autowired
     private FlightRepository flightRepository;
 
+    @Autowired
+    private AirportRepository airportRepository;
+
     public List<Flight> getAllFlights() {
+        List<Flight> flights= new ArrayList<>();
+
         return flightRepository.findAll();
     }
 
@@ -23,7 +32,17 @@ public class FlightService {
         return flight.orElse(null);
     }
 
+    @Transactional
     public Flight createFlight(Flight flight) {
+        // Save the origin and destination airports first if they are new
+        if (flight.getOrigin() != null && flight.getOrigin().getId() == null) {
+            airportRepository.save(flight.getOrigin());
+        }
+        if (flight.getDestination() != null && flight.getDestination().getId() == null) {
+            airportRepository.save(flight.getDestination());
+        }
+
+        // Now save the flight entity
         return flightRepository.save(flight);
     }
 
@@ -50,5 +69,20 @@ public class FlightService {
             return true;
         }
             return false;
+    }
+    public List<Flight> findByOrigin(String originName) {
+        Airport origin = airportRepository.findByCity(originName);
+        if (origin != null) {
+            return flightRepository.findByOrigin(origin);
+        }
+            return null;
+    }
+    public List<Flight> findByDestination(String destinationName){
+        Airport destination = airportRepository.findByCity(destinationName);
+        if(destination != null){
+            return flightRepository.findByDestination(destination);
+        }
+        return null;
+
     }
 }

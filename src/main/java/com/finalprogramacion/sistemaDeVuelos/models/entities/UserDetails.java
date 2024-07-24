@@ -24,10 +24,10 @@ public class UserDetails {
     @Column(name = "phone_number", nullable = false)
     private String phoneNumber;
 
-    @Column(name = "card_number", nullable = false)
+    @Column(name = "card_number")
     private String cardNumber;
 
-    @Column(name = "cbu_number", nullable = false)
+    @Column(name = "cbu_number")
     private String cbuNumber;
 
     @OneToOne
@@ -46,5 +46,11 @@ public class UserDetails {
     public UserDetails(String email, String password) {
         this.email = email;
         this.password = password;
+    }
+
+    public UserDetails(String email, String password, String phoneNumber) {
+        this.email = email;
+        this.password = password;
+        this.phoneNumber = phoneNumber;
     }
 }

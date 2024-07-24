@@ -1,16 +1,19 @@
 package com.finalprogramacion.sistemaDeVuelos.models.entities;
 
 import jakarta.persistence.*;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.sql.Date;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @NoArgsConstructor
 @Getter
 @Setter
+@Data
 @Entity
 @Table(name = "flights")
 public class Flight {
@@ -18,47 +21,47 @@ public class Flight {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "num_flight", unique = true, nullable = false)
+    @Column(name = "flight_num", nullable = false, unique = true)
     private String flightNum;
 
-    @Column(name = "capacity_flight", nullable = false)
+    @Column(name = "capacity", nullable = false)
     private int capacity;
 
-    @Column(name = "availableSeats_flight", nullable = false)
+    @Column(name = "available_seats")
     private int availableSeats;
 
-    @Column(name = "duration_flight", nullable = false)
+    @Column(name = "duration", nullable = false)
     private String duration;
 
-    @Column(name = "airway_flight", nullable = false)
+    @Column(name = "airway", nullable = false)
     private String airway;
 
-    @Column(name = "price_flight", nullable = false)
-    private float price;
+    @Column(name = "price", nullable = false)
+    private double price;
 
-    @Column(name = "departureDate_flight", nullable = false)
-    private Date departureDate;
+    @Column(name = "departure_date", nullable = false)
+    private LocalDate departureDate;
 
-    @Column(name = "state_flight", nullable = false)
+    @Column(name = "state", nullable = false)
     private String state;
 
-    @ManyToOne
-    @JoinColumn(name = "destination_id", referencedColumnName = "id")
-    private Airport destination;
-
-    @ManyToOne
-    @JoinColumn(name = "origin_id", referencedColumnName = "id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "origin_id", nullable = false)
     private Airport origin;
 
-    @ManyToMany
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "destination_id", nullable = false)
+    private Airport destination;
+
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-            name = "flight_scales",
+            name = "flight_stopovers",
             joinColumns = @JoinColumn(name = "flight_id"),
             inverseJoinColumns = @JoinColumn(name = "airport_id")
     )
-    private List<Airport> stopOvers;
+    private List<Airport> stopOvers= new ArrayList<>();
 
-    @OneToMany(mappedBy = "flight", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Seat> seats;
+    @OneToMany(mappedBy = "flight_id",fetch = FetchType.LAZY)
+    private List<Passenger> passenger;
 }
 

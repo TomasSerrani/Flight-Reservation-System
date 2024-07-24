@@ -1,5 +1,6 @@
 package com.finalprogramacion.sistemaDeVuelos.controllers;
 
+import com.finalprogramacion.sistemaDeVuelos.models.entities.User;
 import com.finalprogramacion.sistemaDeVuelos.models.entities.UserDetails;
 import com.finalprogramacion.sistemaDeVuelos.models.services.UserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,5 +39,10 @@ public class UserDetailsController {
     public ResponseEntity<Void> deleteById(@PathVariable Long id) {
         userDetailsService.deleteUserDetails(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/login")
+    public UserDetails login(String email, String password) {
+        return userDetailsService.authenticate(email, password);
     }
 }

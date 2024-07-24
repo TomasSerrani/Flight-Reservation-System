@@ -17,21 +17,21 @@ public class Airport {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "airportName", nullable = false)
-    private String airportName;
+    @Column(name = "name", nullable = false)
+    private String name;
 
-    @Column(name = "cityName", nullable = false)
-    private String cityName;
+    @Column(name = "city", nullable = false)
+    private String city;
 
-    @Column(name = "countryName", nullable = false)
-    private String countryName;
+    @Column(name = "country", nullable = false)
+    private String country;
 
-    @OneToOne(mappedBy = "origin")
-    private Flight originFlight;
+    @OneToMany(mappedBy = "origin", fetch = FetchType.LAZY)
+    private List<Flight> originFlights;
 
-    @OneToOne(mappedBy = "destination")
-    private Flight destinationFlight;
+    @OneToMany(mappedBy = "destination", fetch = FetchType.LAZY)
+    private List<Flight> destinationFlights;
 
-    @ManyToMany(mappedBy = "stopOvers")
+    @ManyToMany(mappedBy = "stopOvers",fetch = FetchType.LAZY)
     private List<Flight> stopOverFlights;
 }

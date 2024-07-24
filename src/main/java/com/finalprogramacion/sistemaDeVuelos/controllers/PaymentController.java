@@ -29,6 +29,11 @@ public class PaymentController {
         return ResponseEntity.notFound().build();
     }
 
+    @GetMapping("/user-reservations")
+    public List<Payment> getUserPayments(@PathVariable Long id) {
+        return paymentService.getUserPayments(id);
+    }
+
     @PostMapping
     public Payment save(@RequestBody Payment payment) {
         return paymentService.createPayment(payment);

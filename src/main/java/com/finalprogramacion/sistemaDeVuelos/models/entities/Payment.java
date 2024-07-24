@@ -31,7 +31,7 @@ public class Payment {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
-    @OneToOne(mappedBy = "payment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "payment")
     private Reservation reservation;
 
     public Payment(Long id, Long number, String type, String state, int amountOfPayments, User user, Reservation reservation) {

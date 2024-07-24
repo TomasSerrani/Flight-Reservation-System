@@ -1,6 +1,7 @@
 package com.finalprogramacion.sistemaDeVuelos.controllers;
 
 import com.finalprogramacion.sistemaDeVuelos.models.entities.User;
+import com.finalprogramacion.sistemaDeVuelos.models.entities.UserDetails;
 import com.finalprogramacion.sistemaDeVuelos.models.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -29,10 +30,17 @@ public class UserController {
             return ResponseEntity.notFound().build();
     }
 
-    @PostMapping
-    public User createUser(@RequestBody User user) {
+    @GetMapping("/current")
+    public UserDetails getCurrentUser(@RequestHeader("Authorization") String token) {
+        return userService.getCurrentUser(token);
+    }
+
+    @PostMapping("/register")
+    public User createUser(User user) {
         return userService.createUser(user);
     }
+
+
 
     @PutMapping("/{id}")
     public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User userDetails) {
@@ -50,4 +58,5 @@ public class UserController {
         }
             return ResponseEntity.notFound().build();
     }
+
 }

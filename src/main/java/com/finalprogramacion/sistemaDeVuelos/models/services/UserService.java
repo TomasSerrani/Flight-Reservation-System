@@ -1,6 +1,8 @@
 package com.finalprogramacion.sistemaDeVuelos.models.services;
 
 import com.finalprogramacion.sistemaDeVuelos.models.entities.User;
+import com.finalprogramacion.sistemaDeVuelos.models.entities.UserDetails;
+import com.finalprogramacion.sistemaDeVuelos.models.services.repositories.UserDetailsRepository;
 import com.finalprogramacion.sistemaDeVuelos.models.services.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,6 +15,9 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private UserDetailsRepository userDetailsRepository;
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
@@ -44,5 +49,8 @@ public class UserService {
             return true;
         }
             return false;
+    }
+    public UserDetails getCurrentUser(String token) {
+        return userDetailsRepository.findByEmail(token);
     }
 }

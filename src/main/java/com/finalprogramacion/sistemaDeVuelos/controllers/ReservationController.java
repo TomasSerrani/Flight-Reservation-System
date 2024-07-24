@@ -29,6 +29,11 @@ public class ReservationController {
             return ResponseEntity.notFound().build();
     }
 
+    @GetMapping("/user-reservations")
+    public List<Reservation> getUserReservations(@PathVariable Long id) {
+        return reservationService.getUserReservations(id);
+    }
+
     @PostMapping
     public Reservation createReservation(@RequestBody Reservation reservation) {
         return reservationService.createReservation(reservation);

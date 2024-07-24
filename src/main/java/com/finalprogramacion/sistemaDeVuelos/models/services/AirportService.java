@@ -31,9 +31,9 @@ public class AirportService {
         Optional<Airport> airport = airportRepository.findById(id);
         if (airport.isPresent()) {
             Airport existingAirport = airport.get();
-            existingAirport.setAirportName(airportDetails.getAirportName());
-            existingAirport.setCityName(airportDetails.getCityName());
-            existingAirport.setCountryName(airportDetails.getCountryName());
+            existingAirport.setName(airportDetails.getName());
+            existingAirport.setCity(airportDetails.getCity());
+            existingAirport.setCountry(airportDetails.getCountry());
             return airportRepository.save(existingAirport);
         }
             return null;

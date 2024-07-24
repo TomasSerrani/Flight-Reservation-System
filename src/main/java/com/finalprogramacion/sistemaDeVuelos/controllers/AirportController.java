@@ -3,6 +3,7 @@ package com.finalprogramacion.sistemaDeVuelos.controllers;
 import com.finalprogramacion.sistemaDeVuelos.models.entities.Airport;
 import com.finalprogramacion.sistemaDeVuelos.models.services.AirportService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,12 +27,13 @@ public class AirportController {
         if (airport != null) {
             return ResponseEntity.ok(airport);
         }
-            return ResponseEntity.notFound().build();
+        return ResponseEntity.notFound().build();
     }
 
     @PostMapping
-    public Airport createAirport(@RequestBody Airport airport) {
-        return airportService.createAirport(airport);
+    public ResponseEntity<Airport> uploadAirport(@RequestBody Airport airport) {
+        Airport savedAirport = airportService.createAirport(airport);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedAirport);
     }
 
     @PutMapping("/{id}")
@@ -40,7 +42,7 @@ public class AirportController {
         if (updatedAirport != null) {
             return ResponseEntity.ok(updatedAirport);
         }
-            return ResponseEntity.notFound().build();
+        return ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}")
@@ -48,6 +50,6 @@ public class AirportController {
         if (airportService.deleteAirport(id)) {
             return ResponseEntity.noContent().build();
         }
-            return ResponseEntity.notFound().build();
+        return ResponseEntity.notFound().build();
     }
 }

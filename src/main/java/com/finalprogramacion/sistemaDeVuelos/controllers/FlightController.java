@@ -3,6 +3,7 @@ package com.finalprogramacion.sistemaDeVuelos.controllers;
 import com.finalprogramacion.sistemaDeVuelos.models.entities.Flight;
 import com.finalprogramacion.sistemaDeVuelos.models.services.FlightService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,12 +27,13 @@ public class FlightController {
         if (flight != null) {
             return ResponseEntity.ok(flight);
         }
-            return ResponseEntity.notFound().build();
+        return ResponseEntity.notFound().build();
     }
 
     @PostMapping
-    public Flight createFlight(@RequestBody Flight flight) {
-        return flightService.createFlight(flight);
+    public ResponseEntity<Flight> uploadFlight(@RequestBody Flight flight) {
+        Flight savedFlight = flightService.createFlight(flight);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedFlight);
     }
 
     @PutMapping("/{id}")
@@ -40,7 +42,7 @@ public class FlightController {
         if (updatedFlight != null) {
             return ResponseEntity.ok(updatedFlight);
         }
-            return ResponseEntity.notFound().build();
+        return ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}")
@@ -48,6 +50,16 @@ public class FlightController {
         if (flightService.deleteFlight(id)) {
             return ResponseEntity.noContent().build();
         }
-            return ResponseEntity.notFound().build();
+        return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/searchByOrigin")
+    public List<Flight> searchFlightsByOrigin(@RequestParam String origin) {
+        return flightService.findByOrigin(origin);
+    }
+
+    @GetMapping("/searchByDestination")
+    public List<Flight> searchFlightsByDestination(@RequestParam String destination) {
+        return flightService.findByDestination(destination);
     }
 }
