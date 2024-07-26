@@ -12,6 +12,6 @@ public class PassengerDTO {
     private String firstName;
     private String lastName;
     private Long seatId;
-    private Long userId;
-    private Long flightId;
+    private UserDTO user;
+    private FlightDTO flight;
 }

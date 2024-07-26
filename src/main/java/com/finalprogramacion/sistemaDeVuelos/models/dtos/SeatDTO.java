@@ -11,6 +11,6 @@ public class SeatDTO {
     private Long id;
     private String seatNumber;
     private String classType;
-    private Long flightId;
-    private Long passengerId;
+    private FlightDTO flight;
+    private PassengerDTO passenger;
 }

@@ -1,13 +1,18 @@
 package com.finalprogramacion.sistemaDeVuelos.controllers;
 
-import com.finalprogramacion.sistemaDeVuelos.models.entities.User;
+import com.finalprogramacion.sistemaDeVuelos.collectors.EntityAndDTOConverter;
+import com.finalprogramacion.sistemaDeVuelos.models.dtos.UserDetailsDTO;
 import com.finalprogramacion.sistemaDeVuelos.models.entities.UserDetails;
 import com.finalprogramacion.sistemaDeVuelos.models.services.UserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.finalprogramacion.sistemaDeVuelos.collectors.EntityAndDTOConverter.*;
 
 @RestController
 @RequestMapping("/userdetails")
@@ -17,28 +22,35 @@ public class UserDetailsController {
     private UserDetailsService userDetailsService;
 
     @GetMapping
-    public List<UserDetails> findAll() {
-        return userDetailsService.getAllUserDetails();
+    public List<UserDetailsDTO> findAll() {
+        return userDetailsService.getAllUserDetails().stream()
+                .map(EntityAndDTOConverter::toUserDetailsDTO)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserDetails> findById(@PathVariable Long id) {
-        UserDetails userDetails = userDetailsService.getUserDetailsById(id);
-        if (userDetails != null) {
-            return ResponseEntity.ok(userDetails);
+    public ResponseEntity<UserDetailsDTO> findById(@PathVariable Long id) {
+        UserDetailsDTO userDetailsDTO = toUserDetailsDTO(userDetailsService.getUserDetailsById(id));
+        if (userDetailsService.getUserDetailsById(id) != null) {
+            return ResponseEntity.ok(userDetailsDTO);
         }
         return ResponseEntity.notFound().build();
     }
 
     @PostMapping
-    public UserDetails save(@RequestBody UserDetails userDetails) {
-        return userDetailsService.createUserDetails(userDetails);
+    public ResponseEntity<UserDetailsDTO> save(@RequestBody UserDetailsDTO userDetails) {
+        UserDetails savedUserDetails =dtoToUserDetails(userDetails);
+        userDetailsService.createUserDetails(savedUserDetails);
+        return ResponseEntity.status(HttpStatus.CREATED).body(userDetails);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteById(@PathVariable Long id) {
-        userDetailsService.deleteUserDetails(id);
-        return ResponseEntity.noContent().build();
+        if (userDetailsService.getUserDetailsById(id) != null) {
+            userDetailsService.deleteUserDetails(id);
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
     }
 
     @PostMapping("/login")

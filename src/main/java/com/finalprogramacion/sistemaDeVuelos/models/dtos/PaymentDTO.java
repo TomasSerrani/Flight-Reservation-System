@@ -13,6 +13,6 @@ public class PaymentDTO {
     private String type;
     private String state;
     private int amountOfPayments;
-    private Long userId;
-    private Long reservationId;
+    private UserDTO user;
+    private ReservationDTO reservation;
 }

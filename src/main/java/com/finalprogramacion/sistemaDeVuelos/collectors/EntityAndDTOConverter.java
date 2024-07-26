@@ -117,20 +117,52 @@ public class EntityAndDTOConverter {
         return entity;
     }
 
-    public static PaymentDTO toPaymentDTO(UserDetails userDetails) {
-        UserDetailsDTO dto = new UserDetailsDTO();
-        dto.setId(userDetails.getId());
-        dto.setEmail(userDetails.getEmail());
-        dto.setPassword(userDetails.getPassword());
-        dto.setPhoneNumber(userDetails.getPhoneNumber());
-        if (userDetails.getCbuNumber() != null && userDetails.getCardNumber() != null){
-            dto.setCardNumber(userDetails.getCardNumber());
-            dto.setCbuNumber(userDetails.getCbuNumber());
-            return dto;
-        }
+    public static PaymentDTO toPaymentDTO(Payment payment) {
+        PaymentDTO dto = new PaymentDTO();
+        dto.setId(payment.getId());
+        dto.setState(payment.getState());
+        dto.setType(payment.getType());
+        dto.setNumber(payment.getNumber());
+        dto.setAmountOfPayments(payment.getAmountOfPayments());
+        dto.setReservation(toReservationDTO(payment.getReservation()));
+        dto.setUser(toUserDTO(payment.getUser()));
+        return dto;
+    }
+    public static Payment dtoToPayment(PaymentDTO paymentDTO) {
+        Payment entity = new Payment();
+        entity.setId(paymentDTO.getId());
+        entity.setState(paymentDTO.getState());
+        entity.setType(paymentDTO.getType());
+        entity.setNumber(paymentDTO.getNumber());
+        entity.setAmountOfPayments(paymentDTO.getAmountOfPayments());
+        entity.setReservation(dtoToReservation(paymentDTO.getReservation()));
+        entity.setUser(dtoToUser(paymentDTO.getUser()));
+        return entity;
+    }
+
+    public static ReservationDTO toReservationDTO(Reservation reservation) {
+        ReservationDTO dto = new ReservationDTO();
+        dto.setId(reservation.getId());
+        dto.setState(reservation.getState());
+        dto.setDate(reservation.getDate());
+        dto.setNumber(reservation.getNumber());
+        dto.setFlight(toFlightDTO(reservation.getFlight()));
+        dto.setPayment(toPaymentDTO(reservation.getPayment()));
+        dto.setUser(toUserDTO(reservation.getUser()));
         return dto;
     }
 
+    public static Reservation dtoToReservation(ReservationDTO reservationDTO) {
+        Reservation entity = new Reservation();
+        entity.setId(reservationDTO.getId());
+        entity.setState(reservationDTO.getState());
+        entity.setDate(reservationDTO.getDate());
+        entity.setNumber(reservationDTO.getNumber());
+        entity.setFlight(dtoToFlight(reservationDTO.getFlight()));
+        entity.setPayment(dtoToPayment(reservationDTO.getPayment()));
+        entity.setUser(dtoToUser(reservationDTO.getUser()));
+        return entity;
+    }
     public static UserDTO toUserDTO(User user) {
         UserDTO dto = new UserDTO();
         dto.setId(user.getId());
@@ -139,7 +171,101 @@ public class EntityAndDTOConverter {
         dto.setUserDetails(toUserDetailsDTO(user.getUserDetails()));
 
         if (user.getPayments() != null) {
-
+            List<PaymentDTO> paymentDTOList = user.getPayments().stream().map(payment -> {
+                PaymentDTO paymentDTO= new PaymentDTO();
+                paymentDTO.setType(payment.getType());
+                paymentDTO.setNumber(payment.getNumber());
+                paymentDTO.setState(payment.getState());
+                paymentDTO.setId(payment.getId());
+                paymentDTO.setAmountOfPayments(payment.getAmountOfPayments());
+                return paymentDTO;
+            }).collect(Collectors.toList());
+            dto.setPayments(paymentDTOList);
         }
+
+        if (user.getReservations() != null){
+                List<ReservationDTO> reservationDTOList = user.getReservations().stream().map(reservation -> {
+                    ReservationDTO reservationDTO= new ReservationDTO();
+                    reservationDTO.setDate(reservation.getDate());
+                    reservationDTO.setNumber(reservation.getNumber());
+                    reservationDTO.setState(reservation.getState());
+                    reservationDTO.setId(reservation.getId());
+                    return reservationDTO;
+                }).collect(Collectors.toList());
+                dto.setReservations(reservationDTOList);
+        }
+        return dto;
+    }
+
+    public static User dtoToUser(UserDTO userDTO) {
+        User entity = new User();
+        entity.setId(userDTO.getId());
+        entity.setName(userDTO.getName());
+        entity.setDateOfBirth(userDTO.getDateOfBirth());
+        entity.setUserDetails(dtoToUserDetails(userDTO.getUserDetails()));
+
+        if (userDTO.getPayments() != null) {
+            List<Payment> paymentList = userDTO.getPayments().stream().map(paymentDTO -> {
+                Payment payment= new Payment();
+                payment.setType(paymentDTO.getType());
+                payment.setNumber(paymentDTO.getNumber());
+                payment.setState(paymentDTO.getState());
+                payment.setId(paymentDTO.getId());
+                payment.setAmountOfPayments(paymentDTO.getAmountOfPayments());
+                return payment;
+            }).collect(Collectors.toList());
+            entity.setPayments(paymentList);
+        }
+
+        if (userDTO.getReservations() != null){
+            List<Reservation> reservationList = userDTO.getReservations().stream().map(reservationDTO -> {
+                Reservation reservation= new Reservation();
+                reservation.setDate(reservationDTO.getDate());
+                reservation.setNumber(reservationDTO.getNumber());
+                reservation.setState(reservationDTO.getState());
+                reservation.setId(reservationDTO.getId());
+                return reservation;
+            }).collect(Collectors.toList());
+            entity.setReservations(reservationList);
+        }
+        return entity;
+    }
+
+    public static PassengerDTO toPassengerDTO(Passenger passenger) {
+        PassengerDTO dto = new PassengerDTO();
+        dto.setId(passenger.getId());
+        dto.setFirstName(passenger.getFirstName());
+        dto.setLastName(passenger.getLastName());
+        dto.setUser(toUserDTO(passenger.getUser()));
+        dto.setFlight(toFlightDTO(passenger.getFlight()));
+        return dto;
+    }
+
+    public static Passenger dtoToPassenger(PassengerDTO passengerDTO) {
+        Passenger entity = new Passenger();
+        entity.setId(passengerDTO.getId());
+        entity.setFirstName(passengerDTO.getFirstName());
+        entity.setLastName(passengerDTO.getLastName());
+        entity.setUser(dtoToUser(passengerDTO.getUser()));
+        entity.setFlight(dtoToFlight(passengerDTO.getFlight()));
+        return entity;
+    }
+
+    public static SeatDTO toSeatDTO(Seat seat) {
+        SeatDTO dto = new SeatDTO();
+        dto.setId(seat.getId());
+        dto.setSeatNumber(seat.getSeatNumber());
+        dto.setPassenger(toPassengerDTO(seat.getPassenger()));
+        dto.setFlight(toFlightDTO(seat.getFlight()));
+        return dto;
+    }
+
+    public static Seat dtoToSeat(SeatDTO seatDTO) {
+        Seat entity = new Seat();
+        entity.setId(seatDTO.getId());
+        entity.setSeatNumber(seatDTO.getSeatNumber());
+        entity.setPassenger(dtoToPassenger(seatDTO.getPassenger()));
+        entity.setFlight(dtoToFlight(seatDTO.getFlight()));
+        return entity;
     }
 }

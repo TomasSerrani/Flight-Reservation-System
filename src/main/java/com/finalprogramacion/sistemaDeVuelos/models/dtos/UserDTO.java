@@ -17,4 +17,10 @@ public class UserDTO {
     private UserDetailsDTO userDetails;
     private List<ReservationDTO> reservations;
     private List<PaymentDTO> payments;
+
+    public UserDTO(String name, Date dateOfBirth, UserDetailsDTO userDetails) {
+        this.name = name;
+        this.dateOfBirth = dateOfBirth;
+        this.userDetails = userDetails;
+    }
 }

@@ -1,12 +1,19 @@
 package com.finalprogramacion.sistemaDeVuelos.controllers;
 
+import com.finalprogramacion.sistemaDeVuelos.collectors.EntityAndDTOConverter;
+import com.finalprogramacion.sistemaDeVuelos.models.dtos.PassengerDTO;
 import com.finalprogramacion.sistemaDeVuelos.models.entities.Passenger;
 import com.finalprogramacion.sistemaDeVuelos.models.services.PassengerService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.finalprogramacion.sistemaDeVuelos.collectors.EntityAndDTOConverter.dtoToPassenger;
+import static com.finalprogramacion.sistemaDeVuelos.collectors.EntityAndDTOConverter.toPassengerDTO;
 
 @RestController
 @RequestMapping("/api/passengers")
@@ -16,27 +23,35 @@ public class PassengerController {
     private PassengerService passengerService;
 
     @GetMapping
-    public List<Passenger> findAll() {
-        return passengerService.getAllPassenger();
+    public List<PassengerDTO> findAll() {
+        return passengerService.getAllPassenger().stream()
+                .map(EntityAndDTOConverter::toPassengerDTO)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Passenger> findById(@PathVariable Long id) {
-        Passenger passenger = passengerService.getPassengerById(id);
-        if (passenger != null) {
+    public ResponseEntity<PassengerDTO> findById(@PathVariable Long id) {
+        PassengerDTO passenger = toPassengerDTO(passengerService.getPassengerById(id));
+        if (passengerService.getPassengerById(id) != null) {
             return ResponseEntity.ok(passenger);
         }
         return ResponseEntity.notFound().build();
     }
 
     @PostMapping
-    public Passenger save(@RequestBody Passenger passenger) {
-        return passengerService.createPassenger(passenger);
+    public ResponseEntity<PassengerDTO> save(@RequestBody PassengerDTO passengerDTO) {
+        Passenger savedPassenger= dtoToPassenger(passengerDTO);
+        passengerService.createPassenger(savedPassenger);
+        return ResponseEntity.status(HttpStatus.CREATED).body(passengerDTO);
+
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteById(@PathVariable Long id) {
-        passengerService.deletePassenger(id);
+        if (passengerService.getPassengerById(id) != null) {
+            passengerService.deletePassenger(id);
+            return ResponseEntity.noContent().build();
+        }
         return ResponseEntity.noContent().build();
     }
 }

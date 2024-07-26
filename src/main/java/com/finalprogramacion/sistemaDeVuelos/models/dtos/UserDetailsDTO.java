@@ -15,4 +15,10 @@ public class UserDetailsDTO {
     private String cardNumber;
     private String cbuNumber;
     private Long userId;
+
+    public UserDetailsDTO(String email, String password, String phoneNumber) {
+        this.email = email;
+        this.password = password;
+        this.phoneNumber = phoneNumber;
+    }
 }

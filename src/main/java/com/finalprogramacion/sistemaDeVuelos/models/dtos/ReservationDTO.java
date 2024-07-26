@@ -13,7 +13,7 @@ public class ReservationDTO {
     private Long number;
     private Date date;
     private String state;
-    private Long userId;
-    private Long paymentId;
-    private Long flightId;
+    private UserDTO user;
+    private PaymentDTO payment;
+    private FlightDTO flight;
 }

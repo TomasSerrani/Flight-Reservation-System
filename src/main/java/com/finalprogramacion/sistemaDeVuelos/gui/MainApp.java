@@ -2,6 +2,7 @@ package com.finalprogramacion.sistemaDeVuelos.gui;
 
 import com.finalprogramacion.sistemaDeVuelos.AppConfig;
 import com.finalprogramacion.sistemaDeVuelos.controllers.*;
+import com.finalprogramacion.sistemaDeVuelos.models.dtos.*;
 import com.finalprogramacion.sistemaDeVuelos.models.entities.*;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -14,6 +15,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+
+import static com.finalprogramacion.sistemaDeVuelos.collectors.EntityAndDTOConverter.toFlightDTO;
+import static com.finalprogramacion.sistemaDeVuelos.collectors.EntityAndDTOConverter.toUserDTO;
 
 @ComponentScan(basePackages = "com.finalprogramacion.sistemaDeVuelos")
 public class MainApp {
@@ -135,8 +139,8 @@ public class MainApp {
                 return;
             }
 
-            UserDetails createdUserDetails = new UserDetails(email, password, phone);
-            User createdUser = new User(name, dateOfBirth, createdUserDetails);
+            UserDetailsDTO createdUserDetails = new UserDetailsDTO(email, password, phone);
+            UserDTO createdUser = new UserDTO(name, dateOfBirth, createdUserDetails);
 
             try {
                 userController.createUser(createdUser);
@@ -191,8 +195,8 @@ public class MainApp {
             // Implement flight search logic
             String origin = originField.getText();
             String destination = destinationField.getText();
-            List<Flight> flightsByOrigins = flightController.searchFlightsByOrigin(origin);
-            List<Flight> flightsByDestinies = flightController.searchFlightsByDestination(destination);
+            List<FlightDTO> flightsByOrigins = flightController.searchFlightsByOrigin(origin);
+            List<FlightDTO> flightsByDestinies = flightController.searchFlightsByDestination(destination);
             flightList.setListData(flightsByOrigins.toArray(new Flight[0]));
             flightList.setListData(flightsByDestinies.toArray(new Flight[0]));
         });
@@ -231,9 +235,9 @@ public class MainApp {
             Flight flight = (Flight) bookButton.getClientProperty("flight");
             UserDetails userDetails = userController.getCurrentUser(userEmail);
             if (userDetails != null) {
-                Reservation reservation = new Reservation();
-                reservation.setUser(userDetails.getUser());
-                reservation.setFlight(flight);
+                ReservationDTO reservation = new ReservationDTO();
+                reservation.setUser(toUserDTO(userDetails.getUser()));
+                reservation.setFlight(toFlightDTO(flight));
                 reservationController.createReservation(reservation);
                 JOptionPane.showMessageDialog(frame, "Flight booked successfully");
             } else {
@@ -268,7 +272,7 @@ public class MainApp {
             // Implement reservation refresh logic
             UserDetails userDetails = userController.getCurrentUser(userEmail);
             if (userDetails != null) {
-                List<Reservation> reservations = reservationController.getUserReservations(userDetails.getId());
+                List<ReservationDTO> reservations = reservationController.getUserReservations(userDetails.getId());
                 reservationList.setListData(reservations.toArray(new Reservation[0]));
             } else {
                 JOptionPane.showMessageDialog(frame, "Please log in first");
@@ -292,7 +296,7 @@ public class MainApp {
             // Implement payment refresh logic
             UserDetails userDetails = userController.getCurrentUser(userEmail);
             if (userDetails != null) {
-                List<Payment> payments = paymentController.getUserPayments(userDetails.getId());
+                List<PaymentDTO> payments = paymentController.getUserPayments(userDetails.getId());
                 paymentList.setListData(payments.toArray(new Payment[0]));
             } else {
                 JOptionPane.showMessageDialog(frame, "Please log in first");
