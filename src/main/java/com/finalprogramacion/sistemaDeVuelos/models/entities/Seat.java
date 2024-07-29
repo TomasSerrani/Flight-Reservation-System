@@ -15,10 +15,10 @@ public class Seat {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "seat_number", nullable = false)
+    @Column(name = "seat_number")
     private String seatNumber;
 
-    @Column(name = "class_type", nullable = false)
+    @Column(name = "class_type")
     private String classType;
 
     @ManyToOne

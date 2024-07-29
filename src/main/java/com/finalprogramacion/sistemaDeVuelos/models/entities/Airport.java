@@ -17,13 +17,13 @@ public class Airport {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name")
     private String name;
 
-    @Column(name = "city", nullable = false)
+    @Column(name = "city")
     private String city;
 
-    @Column(name = "country", nullable = false)
+    @Column(name = "country")
     private String country;
 
     @OneToMany(mappedBy = "origin", fetch = FetchType.LAZY)
