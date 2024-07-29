@@ -82,10 +82,10 @@ public class EntityAndDTOConverter {
 
     public static Airport dtoToAirport(AirportDTO airportDTO) {
         Airport entity = new Airport();
-        entity.setId(entity.getId());
-        entity.setName(entity.getName());
-        entity.setCity(entity.getCity());
-        entity.setCountry(entity.getCountry());
+        entity.setId(airportDTO.getId());
+        entity.setName(airportDTO.getName());
+        entity.setCity(airportDTO.getCity());
+        entity.setCountry(airportDTO.getCountry());
         return entity;
     }
 

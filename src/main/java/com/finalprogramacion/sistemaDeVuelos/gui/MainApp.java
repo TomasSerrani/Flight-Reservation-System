@@ -13,6 +13,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -64,6 +65,10 @@ public class MainApp {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(800, 600);
         frame.add(mainPanel);
+
+        // Center the window on the screen
+        frame.setLocationRelativeTo(null);
+
         frame.setVisible(true);
 
         // Show login panel
@@ -108,32 +113,97 @@ public class MainApp {
     }
 
     private JPanel createRegisterPanel() {
-        JPanel registerPanel = new JPanel();
-        registerPanel.setLayout(new GridLayout(6, 2));
+        JPanel registerPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
+        // Etiqueta y campo de nombre
         JLabel nameLabel = new JLabel("Name:");
-        JTextField nameField = new JTextField();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.weightx = 0.2;
+        registerPanel.add(nameLabel, gbc);
+
+        JTextField nameField = new JTextField(15);
+        gbc.gridx = 1;
+        gbc.weightx = 0.8;
+        registerPanel.add(nameField, gbc);
+
+        // Etiqueta y campo de fecha de nacimiento
         JLabel dateOfBirthLabel = new JLabel("Date of birth: DD/MM/YYYY");
-        JTextField dateOfBirthField = new JTextField();
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.weightx = 0.2;
+        registerPanel.add(dateOfBirthLabel, gbc);
+
+        JTextField dateOfBirthField = new JTextField(15);
+        gbc.gridx = 1;
+        gbc.weightx = 0.8;
+        registerPanel.add(dateOfBirthField, gbc);
+
+        // Etiqueta y campo de correo electrónico
         JLabel emailLabel = new JLabel("Email:");
-        JTextField emailField = new JTextField();
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.weightx = 0.2;
+        registerPanel.add(emailLabel, gbc);
+
+        JTextField emailField = new JTextField(15);
+        gbc.gridx = 1;
+        gbc.weightx = 0.8;
+        registerPanel.add(emailField, gbc);
+
+        // Etiqueta y campo de contraseña
         JLabel passwordLabel = new JLabel("Password:");
-        JPasswordField passwordField = new JPasswordField();
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.weightx = 0.2;
+        registerPanel.add(passwordLabel, gbc);
+
+        JPasswordField passwordField = new JPasswordField(15);
+        gbc.gridx = 1;
+        gbc.weightx = 0.8;
+        registerPanel.add(passwordField, gbc);
+
+        // Etiqueta y campo de teléfono
         JLabel phoneLabel = new JLabel("Phone:");
-        JTextField phoneField = new JTextField();
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        gbc.weightx = 0.2;
+        registerPanel.add(phoneLabel, gbc);
+
+        JTextField phoneField = new JTextField(15);
+        gbc.gridx = 1;
+        gbc.weightx = 0.8;
+        registerPanel.add(phoneField, gbc);
+
+        // Botón de registro
         JButton registerButton = new JButton("Register");
+        gbc.gridx = 0;
+        gbc.gridy = 5;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.fill = GridBagConstraints.NONE;
+        registerPanel.add(registerButton, gbc);
 
         registerButton.addActionListener(e -> {
-            // Implement registration logic
-            String name = nameField.getText();
-            String email = emailField.getText();
-            String password = new String(passwordField.getPassword());
-            String phone = phoneField.getText();
+            // Validación y registro de usuario
+            String name = nameField.getText().trim();
+            String email = emailField.getText().trim();
+            String password = new String(passwordField.getPassword()).trim();
+            String phone = phoneField.getText().trim();
+            String dateOfBirthText = dateOfBirthField.getText().trim();
+
+            if (name.isEmpty() || email.isEmpty() || password.isEmpty() || phone.isEmpty() || dateOfBirthText.isEmpty()) {
+                JOptionPane.showMessageDialog(frame, "All fields are required.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
             Date dateOfBirth;
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-
             try {
-                dateOfBirth = dateFormat.parse(dateOfBirthField.getText());
+                dateOfBirth = dateFormat.parse(dateOfBirthText);
             } catch (ParseException ex) {
                 JOptionPane.showMessageDialog(frame, "Invalid date format. Please use DD/MM/YYYY.", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
@@ -151,61 +221,61 @@ public class MainApp {
             }
         });
 
-        registerPanel.add(nameLabel);
-        registerPanel.add(nameField);
-        registerPanel.add(dateOfBirthLabel);
-        registerPanel.add(dateOfBirthField);
-        registerPanel.add(emailLabel);
-        registerPanel.add(emailField);
-        registerPanel.add(passwordLabel);
-        registerPanel.add(passwordField);
-        registerPanel.add(phoneLabel);
-        registerPanel.add(phoneField);
-        registerPanel.add(new JLabel()); // Empty cell
-        registerPanel.add(registerButton);
-
         return registerPanel;
     }
+
+
 
     private JPanel createFlightSearchPanel() {
         JPanel flightSearchPanel = new JPanel();
         flightSearchPanel.setLayout(new BorderLayout());
 
+        // Panel para los campos de búsqueda
         JPanel searchPanel = new JPanel();
         searchPanel.setLayout(new GridLayout(3, 2));
 
         JLabel originLabel = new JLabel("Origin:");
-        JTextField originField = new JTextField();
+        JComboBox<String> originComboBox = new JComboBox<>();
         JLabel destinationLabel = new JLabel("Destination:");
-        JTextField destinationField = new JTextField();
+        JComboBox<String> destinationComboBox = new JComboBox<>();
         JButton searchButton = new JButton("Search");
 
         searchPanel.add(originLabel);
-        searchPanel.add(originField);
+        searchPanel.add(originComboBox);
         searchPanel.add(destinationLabel);
-        searchPanel.add(destinationField);
-        searchPanel.add(new JLabel());
+        searchPanel.add(destinationComboBox);
+        searchPanel.add(new JLabel()); // Empty cell
         searchPanel.add(searchButton);
 
         JList<Flight> flightList = new JList<>();
         flightSearchPanel.add(searchPanel, BorderLayout.NORTH);
         flightSearchPanel.add(new JScrollPane(flightList), BorderLayout.CENTER);
 
+        // Set preferred size for button
+        searchButton.setPreferredSize(new Dimension(100, 30));
+
+        // Populate JComboBoxes with airport names
+        //populateAirportComboBoxes(originComboBox, destinationComboBox);
+
         searchButton.addActionListener(e -> {
-            // Implement flight search logic
-            String origin = originField.getText();
-            String destination = destinationField.getText();
-            List<FlightDTO> flightsByOrigins = flightController.searchFlightsByOrigin(origin);
-            List<FlightDTO> flightsByDestinies = flightController.searchFlightsByDestination(destination);
-            flightList.setListData(flightsByOrigins.toArray(new Flight[0]));
-            flightList.setListData(flightsByDestinies.toArray(new Flight[0]));
+            // Get selected origin and destination
+            String origin = (String) originComboBox.getSelectedItem();
+            String destination = (String) destinationComboBox.getSelectedItem();
+            if (origin != null && destination != null) {
+                List<FlightDTO> flightsByOrigins = flightController.searchFlightsByOrigin(origin);
+                List<FlightDTO> flightsByDestinies = flightController.searchFlightsByDestination(destination);
+                // Combine both lists, assuming you want to display all flights
+                List<FlightDTO> allFlights = new ArrayList<>();
+                allFlights.addAll(flightsByOrigins);
+                allFlights.addAll(flightsByDestinies);
+                flightList.setListData(allFlights.toArray(new Flight[0]));
+            }
         });
 
         flightList.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
                 Flight selectedFlight = flightList.getSelectedValue();
                 if (selectedFlight != null) {
-                    // Show flight details
                     showFlightDetails(selectedFlight);
                 }
             }
@@ -213,6 +283,7 @@ public class MainApp {
 
         return flightSearchPanel;
     }
+
 
     private JPanel createFlightDetailsPanel() {
         JPanel flightDetailsPanel = new JPanel();
