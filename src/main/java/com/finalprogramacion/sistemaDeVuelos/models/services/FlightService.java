@@ -60,7 +60,7 @@ public class FlightService {
             existingFlight.setState(flightDetails.getState());
             return flightRepository.save(existingFlight);
         }
-            return null;
+        return null;
     }
 
     public boolean deleteFlight(Long id) {
@@ -68,14 +68,14 @@ public class FlightService {
             flightRepository.deleteById(id);
             return true;
         }
-            return false;
+        return false;
     }
     public List<Flight> findByOrigin(String originName) {
         Airport origin = airportRepository.findByCity(originName);
         if (origin != null) {
             return flightRepository.findByOrigin(origin);
         }
-            return null;
+        return null;
     }
     public List<Flight> findByDestination(String destinationName){
         Airport destination = airportRepository.findByCity(destinationName);

@@ -24,6 +24,11 @@ public class UserDetailsService {
         return userDetails.orElse(null);
     }
 
+    public UserDetails getUserEmail(String email) {
+        Optional<UserDetails> userDetails = Optional.ofNullable(userDetailsRepository.findByEmail(email));
+        return userDetails.orElse(null);
+    }
+
     public UserDetails createUserDetails(UserDetails userDetails) {
         return userDetailsRepository.save(userDetails);
     }

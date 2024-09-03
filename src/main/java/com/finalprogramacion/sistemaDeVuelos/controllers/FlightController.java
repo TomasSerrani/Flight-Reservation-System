@@ -40,9 +40,14 @@ public class FlightController {
 
     @PostMapping
     public ResponseEntity<FlightDTO> uploadFlight(@RequestBody FlightDTO flightDTO) {
-        Flight savedFlight = dtoToFlight(flightDTO);
-        flightService.createFlight(savedFlight);
-        return ResponseEntity.status(HttpStatus.CREATED).body(flightDTO);
+        try {
+            Flight savedFlight = dtoToFlight(flightDTO);
+            flightService.createFlight(savedFlight);
+            return ResponseEntity.status(HttpStatus.CREATED).body(flightDTO);
+        } catch (Exception e) {
+            e.printStackTrace(); // Esto imprimirá la traza de la excepción en los logs
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @PutMapping("/{id}")
@@ -77,4 +82,9 @@ public class FlightController {
                 .map(EntityAndDTOConverter::toFlightDTO)
                 .collect(Collectors.toList());
     }
+
+    public List<FlightDTO> findByOriginCity(String origin) {
+        return List.of();
+    }
+
 }

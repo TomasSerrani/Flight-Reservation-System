@@ -9,6 +9,9 @@ import java.util.List;
 
 @Repository
 public interface FlightRepository extends JpaRepository<Flight, Long> {
+    List<Flight> findByOriginCity(String originCity);
+    List<Flight> findByDestinationCity(String destinationCity);
+
     List<Flight> findByOrigin(Airport origin);
     List<Flight> findByDestination(Airport destination);
 }

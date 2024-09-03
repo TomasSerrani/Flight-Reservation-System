@@ -74,7 +74,7 @@ public class EntityAndDTOConverter {
     public static AirportDTO toAirportDTO(Airport airport) {
         AirportDTO dto = new AirportDTO();
         dto.setId(airport.getId());
-        dto.setName(airport.getName());
+        dto.setName(airport.getName() != null ? airport.getName() : "");
         dto.setCity(airport.getCity());
         dto.setCountry(airport.getCountry());
         return dto;

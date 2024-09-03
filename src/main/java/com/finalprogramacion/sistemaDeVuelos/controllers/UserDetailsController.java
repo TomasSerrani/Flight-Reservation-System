@@ -57,4 +57,13 @@ public class UserDetailsController {
     public UserDetails login(String email, String password) {
         return userDetailsService.authenticate(email, password);
     }
+
+    @GetMapping("/email")
+    public ResponseEntity<UserDetailsDTO> findByEmail(@PathVariable String email) {
+        UserDetailsDTO userDetailsDTO = toUserDetailsDTO(userDetailsService.getUserEmail(email));
+        if (userDetailsService.getUserEmail(email) != null) {
+            return ResponseEntity.ok(userDetailsDTO);
+        }
+        return ResponseEntity.notFound().build();
+    }
 }
