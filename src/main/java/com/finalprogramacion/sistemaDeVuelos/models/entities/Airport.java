@@ -26,12 +26,12 @@ public class Airport {
     @Column(name = "country")
     private String country;
 
-    @OneToMany(mappedBy = "origin", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "origin", fetch = FetchType.EAGER)
     private List<Flight> originFlights;
 
-    @OneToMany(mappedBy = "destination", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "destination", fetch = FetchType.EAGER)
     private List<Flight> destinationFlights;
 
-    @ManyToMany(mappedBy = "stopOvers",fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "stopOvers",fetch = FetchType.EAGER)
     private List<Flight> stopOverFlights;
 }

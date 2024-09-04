@@ -69,22 +69,10 @@ public class FlightController {
         return ResponseEntity.notFound().build();
     }
 
-    @GetMapping("/searchByOrigin")
-    public List<FlightDTO> searchFlightsByOrigin(@RequestParam String origin) {
-        return flightService.findByOrigin(origin).stream()
+    @GetMapping("/searchByOriginAndDestination")
+    public List<FlightDTO> searchFlightsByOriginAndDestination(@RequestParam String origin, String destination) {
+        return flightService.findByOriginAndDestination(origin, destination).stream()
                 .map(EntityAndDTOConverter::toFlightDTO)
                 .collect(Collectors.toList());
     }
-
-    @GetMapping("/searchByDestination")
-    public List<FlightDTO> searchFlightsByDestination(@RequestParam String destination) {
-        return flightService.findByDestination(destination).stream()
-                .map(EntityAndDTOConverter::toFlightDTO)
-                .collect(Collectors.toList());
-    }
-
-    public List<FlightDTO> findByOriginCity(String origin) {
-        return List.of();
-    }
-
 }

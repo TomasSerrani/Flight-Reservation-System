@@ -45,15 +45,15 @@ public class Flight {
     @Column(name = "state")
     private String state;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "origin_id")
     private Airport origin;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "destination_id")
     private Airport destination;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "flight_stopovers",
             joinColumns = @JoinColumn(name = "flight_id"),
@@ -61,7 +61,7 @@ public class Flight {
     )
     private List<Airport> stopOvers;
 
-    @OneToMany(mappedBy = "flight",fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "flight",fetch = FetchType.EAGER)
     private List<Passenger> passenger;
 }
 

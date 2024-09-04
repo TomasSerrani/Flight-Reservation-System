@@ -70,19 +70,12 @@ public class FlightService {
         }
         return false;
     }
-    public List<Flight> findByOrigin(String originName) {
+    public List<Flight> findByOriginAndDestination(String originName, String destinationName) {
         Airport origin = airportRepository.findByCity(originName);
-        if (origin != null) {
-            return flightRepository.findByOrigin(origin);
-        }
-        return null;
-    }
-    public List<Flight> findByDestination(String destinationName){
         Airport destination = airportRepository.findByCity(destinationName);
-        if(destination != null){
-            return flightRepository.findByDestination(destination);
+        if (origin != null && destination != null) {
+            return flightRepository.findByOriginAndDestination(origin,destination);
         }
         return null;
-
     }
 }

@@ -21,7 +21,7 @@ import static com.finalprogramacion.sistemaDeVuelos.collectors.EntityAndDTOConve
 
 @ComponentScan(basePackages = "com.finalprogramacion.sistemaDeVuelos")
 public class MainApp {
-    private static ApplicationContext context;
+    private ApplicationContext context;
 
     private JFrame frame;
     private JPanel mainPanel;
@@ -37,22 +37,26 @@ public class MainApp {
     private String userEmail;
 
     public MainApp() {
-        // Initialize Spring context
-        ApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
+        initializeContext();
+        initializeControllers();
+        setupUI();
+    }
+    private void initializeContext() {
+        context = new AnnotationConfigApplicationContext(AppConfig.class);
+    }
 
-        // Initialize controllers from Spring context
+    private void initializeControllers() {
         userController = context.getBean(UserController.class);
         flightController = context.getBean(FlightController.class);
         reservationController = context.getBean(ReservationController.class);
         paymentController = context.getBean(PaymentController.class);
         userDetailsController = context.getBean(UserDetailsController.class);
-
-        // Initialize GUI components
+    }
+    private void setupUI() {
         frame = new JFrame("Flight Reservation System");
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
 
-        // Add all panels to card layout
         mainPanel.add(createLoginPanel(), "Login");
         mainPanel.add(createRegisterPanel(), "Register");
         mainPanel.add(createFlightSearchPanel(), "FlightSearch");
@@ -60,17 +64,12 @@ public class MainApp {
         mainPanel.add(createUserReservationsPanel(), "UserReservations");
         mainPanel.add(createUserPaymentsPanel(), "UserPayments");
 
-        // Setup frame
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(800, 600);
         frame.add(mainPanel);
-
-        // Center the window on the screen
         frame.setLocationRelativeTo(null);
-
         frame.setVisible(true);
 
-        // Show login panel
         cardLayout.show(mainPanel, "Login");
     }
 
@@ -187,7 +186,6 @@ public class MainApp {
         registerPanel.add(registerButton, gbc);
 
         registerButton.addActionListener(e -> {
-            // Validación y registro de usuario
             String name = nameField.getText().trim();
             String email = emailField.getText().trim();
             String password = new String(passwordField.getPassword()).trim();
@@ -232,7 +230,7 @@ public class MainApp {
         JPanel flightSearchPanel = new JPanel();
         flightSearchPanel.setLayout(new BorderLayout());
 
-        // Panel para los campos de búsqueda
+        // Panel for search fields
         JPanel searchPanel = new JPanel();
         searchPanel.setLayout(new GridLayout(3, 2));
 
@@ -264,62 +262,31 @@ public class MainApp {
             // Get selected origin and destination
             String origin = (String) originComboBox.getSelectedItem();
             String destination = (String) destinationComboBox.getSelectedItem();
-            if (origin != null && destination != null) {
-                List<FlightDTO> flightsByOrigins = flightController.findByOriginCity(origin);
-                List<FlightDTO> flightsByDestinies = flightController.searchFlightsByDestination(destination);
-                // Combine both lists, assuming you want to display all flights
-                List<FlightDTO> allFlights = new ArrayList<>();
-                allFlights.addAll(flightsByOrigins);
-                allFlights.addAll(flightsByDestinies);
-                flightList.setListData(allFlights.toArray(new FlightDTO[0]));
-            }
-        });
 
-        flightList.addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting()) {
-                FlightDTO selectedFlight = flightList.getSelectedValue();
-                if (selectedFlight != null) {
-                    showFlightDetails(selectedFlight);
-                }
+            if (origin != null && destination != null) {
+                // Find flights that match both origin and destination
+                List<FlightDTO> matchingFlights = flightController.searchFlightsByOriginAndDestination(origin, destination);
+
+                // Display the flights in the JList
+                flightList.setListData(matchingFlights.toArray(new FlightDTO[0]));
+            } else {
+                // Handle case where either origin or destination is not selected
+                flightList.setListData(new FlightDTO[0]); // Clear the list
             }
         });
 
         return flightSearchPanel;
     }
 
-    private void showFlightDetails(FlightDTO flightDTO) {
-        JLabel flightNumValue = new JLabel(flightDTO.getFlightNum());
-        JLabel originValue = new JLabel(flightDTO.getOrigin().getName());
-        JLabel destinationValue = new JLabel(flightDTO.getDestination().getName());
-        JLabel departureValue = new JLabel(flightDTO.getDepartureDate().toString());
-        JLabel priceValue = new JLabel(String.valueOf(flightDTO.getPrice()));
-        JButton bookButton = new JButton("Book");
-
-        bookButton.putClientProperty("flightDTO", flightDTO);
-
-        JPanel flightDetailsPanel = createFlightDetailsPanel();
-        flightDetailsPanel.add(flightNumValue);
-        flightDetailsPanel.add(originValue);
-        flightDetailsPanel.add(destinationValue);
-        flightDetailsPanel.add(departureValue);
-        flightDetailsPanel.add(priceValue);
-        flightDetailsPanel.add(bookButton);
-
-        mainPanel.add(flightDetailsPanel, "FlightDetails");
-        cardLayout.show(mainPanel, "FlightDetails");
-    }
-
-
-
     private void populateFlightComboBoxes(JComboBox<String> originComboBox, JComboBox<String> destinationComboBox) {
         // Obtener la lista de vuelos desde el servicio
         List<FlightDTO> flights = flightController.getAllFlights();
 
         for (FlightDTO flight : flights) {
-            String originFlightInfo = flight.getOrigin().getCity() + " (" + flight.getFlightNum() + ")";
+            String originFlightInfo = flight.getOrigin().getCity();
             originComboBox.addItem(originFlightInfo);
 
-            String destinationFlightInfo = flight.getDestination().getCity() + " (" + flight.getFlightNum() + ")";
+            String destinationFlightInfo = flight.getDestination().getCity();
             destinationComboBox.addItem(destinationFlightInfo);
         }
     }
@@ -338,6 +305,32 @@ public class MainApp {
         JLabel departureValue = new JLabel();
         JLabel priceLabel = new JLabel("Price:");
         JLabel priceValue = new JLabel();
+        JButton bookButton = getBookButton();
+
+        flightDetailsPanel.add(flightNumLabel);
+        flightDetailsPanel.add(flightNumValue);
+        flightDetailsPanel.add(originLabel);
+        flightDetailsPanel.add(originValue);
+        flightDetailsPanel.add(destinationLabel);
+        flightDetailsPanel.add(destinationValue);
+        flightDetailsPanel.add(departureLabel);
+        flightDetailsPanel.add(departureValue);
+        flightDetailsPanel.add(priceLabel);
+        flightDetailsPanel.add(priceValue);
+        flightDetailsPanel.add(new JLabel());
+        flightDetailsPanel.add(bookButton);
+
+        flightDetailsPanel.putClientProperty("flightNumValue", flightNumValue);
+        flightDetailsPanel.putClientProperty("originValue", originValue);
+        flightDetailsPanel.putClientProperty("destinationValue", destinationValue);
+        flightDetailsPanel.putClientProperty("departureValue", departureValue);
+        flightDetailsPanel.putClientProperty("priceValue", priceValue);
+        flightDetailsPanel.putClientProperty("bookButton", bookButton);
+
+        return flightDetailsPanel;
+    }
+
+    private JButton getBookButton() {
         JButton bookButton = new JButton("Book");
 
         bookButton.addActionListener(e -> {
@@ -354,21 +347,34 @@ public class MainApp {
                 JOptionPane.showMessageDialog(frame, "Please log in first");
             }
         });
+        return bookButton;
+    }
 
-        flightDetailsPanel.add(flightNumLabel);
-        flightDetailsPanel.add(flightNumValue);
-        flightDetailsPanel.add(originLabel);
-        flightDetailsPanel.add(originValue);
-        flightDetailsPanel.add(destinationLabel);
-        flightDetailsPanel.add(destinationValue);
-        flightDetailsPanel.add(departureLabel);
-        flightDetailsPanel.add(departureValue);
-        flightDetailsPanel.add(priceLabel);
-        flightDetailsPanel.add(priceValue);
-        flightDetailsPanel.add(new JLabel());
-        flightDetailsPanel.add(bookButton);
+    private void showFlightDetails(FlightDTO flightDTO) {
+        // Create or retrieve the panel
+        JPanel flightDetailsPanel = createFlightDetailsPanel();
 
-        return flightDetailsPanel;
+        // Get references to the labels and button
+        JLabel flightNumValue = (JLabel) flightDetailsPanel.getClientProperty("flightNumValue");
+        JLabel originValue = (JLabel) flightDetailsPanel.getClientProperty("originValue");
+        JLabel destinationValue = (JLabel) flightDetailsPanel.getClientProperty("destinationValue");
+        JLabel departureValue = (JLabel) flightDetailsPanel.getClientProperty("departureValue");
+        JLabel priceValue = (JLabel) flightDetailsPanel.getClientProperty("priceValue");
+        JButton bookButton = (JButton) flightDetailsPanel.getClientProperty("bookButton");
+
+        // Update the panel with flight details
+        flightNumValue.setText(flightDTO.getFlightNum());
+        originValue.setText(flightDTO.getOrigin().getName());
+        destinationValue.setText(flightDTO.getDestination().getName());
+        departureValue.setText(flightDTO.getDepartureDate().toString());
+        priceValue.setText(String.valueOf(flightDTO.getPrice()));
+
+        // Set the flightDTO on the book button
+        bookButton.putClientProperty("flightDTO", flightDTO);
+
+        // Add the updated panel to the mainPanel and show it
+        mainPanel.add(flightDetailsPanel, "FlightDetails");
+        cardLayout.show(mainPanel, "FlightDetails");
     }
 
     private JPanel createUserReservationsPanel() {
@@ -424,7 +430,6 @@ public class MainApp {
 
 
     public static void main(String[] args) {
-        context = new AnnotationConfigApplicationContext(AppConfig.class);
         SwingUtilities.invokeLater(MainApp::new);
     }
 }

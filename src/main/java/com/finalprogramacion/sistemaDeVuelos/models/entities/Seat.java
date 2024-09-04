@@ -25,6 +25,6 @@ public class Seat {
     @JoinColumn(name = "flight_id", referencedColumnName = "id")
     private Flight flight;
 
-    @OneToOne(mappedBy = "seat", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "seat", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Passenger passenger;
 }
