@@ -17,4 +17,16 @@ public class AirportDTO {
     private List<FlightDTO> originFlights;
     private List<FlightDTO> destinationFlights;
     private List<FlightDTO> stopOverFlights;
+
+    @Override
+    public String toString() {
+        return "AirportDTO{" +
+                "name='" + name + '\'' +
+                ", city='" + city + '\'' +
+                ", country='" + country + '\'' +
+                ", originFlights=" + originFlights +
+                ", destinationFlights=" + destinationFlights +
+                ", stopOverFlights=" + stopOverFlights +
+                '}';
+    }
 }

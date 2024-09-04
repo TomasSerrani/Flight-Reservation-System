@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.sql.Time;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +45,9 @@ public class Flight {
 
     @Column(name = "state")
     private String state;
+
+    @Column(name = "departure_time")
+    private Time departureTime;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "origin_id")

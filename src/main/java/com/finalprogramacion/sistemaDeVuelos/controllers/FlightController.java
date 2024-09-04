@@ -70,8 +70,9 @@ public class FlightController {
     }
 
     @GetMapping("/searchByOriginAndDestination")
-    public List<FlightDTO> searchFlightsByOriginAndDestination(@RequestParam String origin, String destination) {
-        return flightService.findByOriginAndDestination(origin, destination).stream()
+    public List<FlightDTO> searchFlightsByOriginAndDestination(String origin, String destination) {
+        return flightService.findByOriginAndDestination(origin, destination)
+                .stream()
                 .map(EntityAndDTOConverter::toFlightDTO)
                 .collect(Collectors.toList());
     }

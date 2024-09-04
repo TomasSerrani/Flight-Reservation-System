@@ -18,6 +18,7 @@ public class EntityAndDTOConverter {
         dto.setPrice(flight.getPrice());
         dto.setDepartureDate(flight.getDepartureDate());
         dto.setState(flight.getState());
+        dto.setDepartureTime(flight.getDepartureTime());
         dto.setOrigin(toAirportDTO(flight.getOrigin()));
         dto.setDestination(toAirportDTO(flight.getDestination()));
 
@@ -44,6 +45,7 @@ public class EntityAndDTOConverter {
         entity.setPrice(flightDTO.getPrice());
         entity.setDepartureDate(flightDTO.getDepartureDate());
         entity.setState(flightDTO.getState());
+        entity.setDepartureTime(flightDTO.getDepartureTime());
 
         Airport origin= new Airport();
         origin.setCity(flightDTO.getOrigin().getCity());

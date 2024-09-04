@@ -14,4 +14,15 @@ public class PassengerDTO {
     private Long seatId;
     private UserDTO user;
     private FlightDTO flight;
+
+    @Override
+    public String toString() {
+        return "PassengerDTO{" +
+                "firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", seatId=" + seatId +
+                ", user=" + user +
+                ", flight=" + flight +
+                '}';
+    }
 }
