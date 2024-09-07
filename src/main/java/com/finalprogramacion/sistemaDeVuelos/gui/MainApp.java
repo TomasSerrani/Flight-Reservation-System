@@ -109,24 +109,34 @@ public class MainApp {
         return loginPanel;
     }
 
+    private JButton createBackButton() {
+        JButton backButton = new JButton("<-");
+        backButton.addActionListener(e -> cardLayout.show(mainPanel, "Login"));
+        return backButton;
+    }
+
     private JPanel createRegisterPanel() {
         JPanel registerPanel = new JPanel(new GridBagLayout());
 
         GridBagConstraints gbc = new GridBagConstraints();
-
         gbc.insets = new Insets(5, 5, 5, 5);
-
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        // Etiqueta y campo de nombre
-        JLabel nameLabel = new JLabel("Name:");
+        // Botón de retroceso
         gbc.gridx = 0;
         gbc.gridy = 0;
-        gbc.weightx = 0.2;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.WEST;
+        registerPanel.add(createBackButton(), gbc); // Añadir el botón "<-"
+
+        // Etiqueta y campo de nombre
+        gbc.gridy++;
+        gbc.gridwidth = 1;
+        JLabel nameLabel = new JLabel("Name:");
         registerPanel.add(nameLabel, gbc);
+
         JTextField nameField = new JTextField(15);
         gbc.gridx = 1;
-        gbc.weightx = 0.8;
         registerPanel.add(nameField, gbc);
 
         // Etiqueta y campo de fecha de nacimiento
@@ -225,12 +235,13 @@ public class MainApp {
     }
 
     private JPanel createFlightSearchPanel() {
-        JPanel flightSearchPanel = new JPanel();
-        flightSearchPanel.setLayout(new BorderLayout());
+        JPanel flightSearchPanel = new JPanel(new BorderLayout());
+
+        // Añadir el botón "<-" en la parte superior
+        flightSearchPanel.add(createBackButton(), BorderLayout.NORTH);
 
         // Panel for search fields
-        JPanel searchPanel = new JPanel();
-        searchPanel.setLayout(new GridLayout(3, 2));
+        JPanel searchPanel = new JPanel(new GridLayout(3, 2));
 
         JLabel originLabel = new JLabel("Origin:");
         JComboBox<String> originComboBox = new JComboBox<>();
@@ -323,52 +334,75 @@ public class MainApp {
 
     private void showFlightDetails(FlightDTO flightDTO) {
         // Crear un nuevo panel de detalles de vuelo
-        JPanel flightDetailsPanel = new JPanel(new GridLayout(6, 2));
+        JPanel flightDetailsPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        // Crear e inicializar las etiquetas para mostrar los detalles
+        // Etiquetas para los detalles del vuelo
         JLabel flightNumLabel = new JLabel("Flight Number:");
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        flightDetailsPanel.add(flightNumLabel, gbc);
+
         JLabel flightNumValue = new JLabel(flightDTO.getFlightNum());
+        gbc.gridx = 1;
+        flightDetailsPanel.add(flightNumValue, gbc);
+
         JLabel originLabel = new JLabel("Origin:");
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        flightDetailsPanel.add(originLabel, gbc);
+
         JLabel originValue = new JLabel(flightDTO.getOrigin().getName());
+        gbc.gridx = 1;
+        flightDetailsPanel.add(originValue, gbc);
+
         JLabel destinationLabel = new JLabel("Destination:");
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        flightDetailsPanel.add(destinationLabel, gbc);
+
         JLabel destinationValue = new JLabel(flightDTO.getDestination().getName());
+        gbc.gridx = 1;
+        flightDetailsPanel.add(destinationValue, gbc);
+
         JLabel departureLabel = new JLabel("Departure:");
-        JLabel departureValue = new JLabel(flightDTO.getDepartureDate().toString() + flightDTO.getDepartureTime().toString());
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        flightDetailsPanel.add(departureLabel, gbc);
+
+        JLabel departureValue = new JLabel(flightDTO.getDepartureDate().toString() + " " + flightDTO.getDepartureTime().toString());
+        gbc.gridx = 1;
+        flightDetailsPanel.add(departureValue, gbc);
+
         JLabel priceLabel = new JLabel("Price:");
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        flightDetailsPanel.add(priceLabel, gbc);
+
         JLabel priceValue = new JLabel(String.valueOf(flightDTO.getPrice()));
+        gbc.gridx = 1;
+        flightDetailsPanel.add(priceValue, gbc);
 
-        // Agregar los componentes al panel de detalles
-        flightDetailsPanel.add(flightNumLabel);
-        flightDetailsPanel.add(flightNumValue);
-        flightDetailsPanel.add(originLabel);
-        flightDetailsPanel.add(originValue);
-        flightDetailsPanel.add(destinationLabel);
-        flightDetailsPanel.add(destinationValue);
-        flightDetailsPanel.add(departureLabel);
-        flightDetailsPanel.add(departureValue);
-        flightDetailsPanel.add(priceLabel);
-        flightDetailsPanel.add(priceValue);
-
-        // Agregar botón de reserva
+        // Botón para reservar
         JButton bookButton = new JButton("Book");
         bookButton.putClientProperty("flightDTO", flightDTO);
-        flightDetailsPanel.add(new JLabel()); // Empty cell for alignment
-        flightDetailsPanel.add(bookButton);
+        gbc.gridx = 0;
+        gbc.gridy = 5;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
+        flightDetailsPanel.add(bookButton, gbc);
 
         bookButton.addActionListener(e -> {
-            // Obtener el vuelo seleccionado
             FlightDTO flightDTO1 = (FlightDTO) bookButton.getClientProperty("flightDTO");
-
-            // Obtener los detalles del usuario
             UserDetails userDetails = userController.getCurrentUser(userEmail);
 
             if (userDetails != null && userDetails.getUser() != null) {
-                // Crear una nueva reserva
                 ReservationDTO reservation = new ReservationDTO();
                 reservation.setUser(toUserDTO(userDetails.getUser()));
                 reservation.setFlight(flightDTO1);
 
-                // Intentar crear la reserva
                 try {
                     reservationController.createReservation(reservation);
                     JOptionPane.showMessageDialog(frame, "Flight booked successfully");
@@ -379,10 +413,21 @@ public class MainApp {
                 JOptionPane.showMessageDialog(frame, "Please log in first or ensure user details are valid");
             }
         });
+
+        // Agregar botón de retroceso "<-"
+        JButton backButton = new JButton("<- Back");
+        gbc.gridx = 0;
+        gbc.gridy = 6;
+        gbc.gridwidth = 2;
+        flightDetailsPanel.add(backButton, gbc);
+
+        backButton.addActionListener(e -> cardLayout.show(mainPanel, "FlightSearch"));
+
         // Mostrar el panel de detalles en el CardLayout
         mainPanel.add(flightDetailsPanel, "FlightDetails");
         cardLayout.show(mainPanel, "FlightDetails");
     }
+
 
     private JPanel createUserReservationsPanel() {
         JPanel userReservationsPanel = new JPanel();
