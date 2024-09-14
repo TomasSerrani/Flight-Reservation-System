@@ -24,7 +24,7 @@ public class UserDetailsService {
         return userDetails.orElse(null);
     }
 
-    public UserDetails getUserEmail(String email) {
+    public UserDetails getUserbyEmail(String email) {
         Optional<UserDetails> userDetails = Optional.ofNullable(userDetailsRepository.findByEmail(email));
         return userDetails.orElse(null);
     }

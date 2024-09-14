@@ -43,4 +43,13 @@ public class Payment {
         this.user = user;
         this.reservation = reservation;
     }
+
+    public Payment(Long number, String type, String state, int amountOfPayments, User user) {
+        this.number = number;
+        this.type = type;
+        this.state = state;
+        this.amountOfPayments = amountOfPayments;
+        this.user = user;
+    }
+
 }

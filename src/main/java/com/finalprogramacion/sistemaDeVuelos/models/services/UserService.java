@@ -16,9 +16,6 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private UserDetailsRepository userDetailsRepository;
-
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
@@ -40,7 +37,7 @@ public class UserService {
             existingUser.setDateOfBirth(userDetails.getDateOfBirth());
             return userRepository.save(existingUser);
         }
-            return null;
+        return null;
     }
 
     public boolean deleteUser(Long id) {
@@ -48,9 +45,6 @@ public class UserService {
             userRepository.deleteById(id);
             return true;
         }
-            return false;
-    }
-    public UserDetails getCurrentUser(String token) {
-        return userDetailsRepository.findByEmail(token);
+        return false;
     }
 }

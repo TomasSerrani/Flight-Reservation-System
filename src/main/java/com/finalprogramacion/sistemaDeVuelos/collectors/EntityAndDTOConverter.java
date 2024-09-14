@@ -97,10 +97,12 @@ public class EntityAndDTOConverter {
         dto.setEmail(userDetails.getEmail());
         dto.setPassword(userDetails.getPassword());
         dto.setPhoneNumber(userDetails.getPhoneNumber());
-        if (userDetails.getCbuNumber() != null && userDetails.getCardNumber() != null){
-            dto.setCardNumber(userDetails.getCardNumber());
+        if (userDetails.getCbuNumber() != null){
             dto.setCbuNumber(userDetails.getCbuNumber());
-            return dto;
+        } if(userDetails.getCardNumber() != null) {
+            dto.setCardNumber(userDetails.getCardNumber());
+            dto.setCardCVV(userDetails.getCardCVV());
+            dto.setCardExpiry(userDetails.getCardExpiry());
         }
         return dto;
     }
@@ -111,11 +113,13 @@ public class EntityAndDTOConverter {
         entity.setEmail(userDetailsDTO.getEmail());
         entity.setPassword(userDetailsDTO.getPassword());
         entity.setPhoneNumber(userDetailsDTO.getPhoneNumber());
-        if (userDetailsDTO.getCbuNumber() != null && userDetailsDTO.getCardNumber() != null){
-            entity.setCardNumber(userDetailsDTO.getCardNumber());
+        if (userDetailsDTO.getCbuNumber() != null){
             entity.setCbuNumber(userDetailsDTO.getCbuNumber());
-            return entity;
-        }
+        } if(userDetailsDTO.getCardNumber() != null) {
+        entity.setCardNumber(userDetailsDTO.getCardNumber());
+        entity.setCardCVV(userDetailsDTO.getCardCVV());
+        entity.setCardExpiry(userDetailsDTO.getCardExpiry());
+    }
         return entity;
     }
 

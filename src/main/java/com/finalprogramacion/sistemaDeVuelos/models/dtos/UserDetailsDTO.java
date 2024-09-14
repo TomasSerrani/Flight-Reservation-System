@@ -15,6 +15,8 @@ public class UserDetailsDTO {
     private String cardNumber;
     private String cbuNumber;
     private Long userId;
+    private String cardCVV;
+    private String cardExpiry;
 
     public UserDetailsDTO(String email, String password, String phoneNumber) {
         this.email = email;

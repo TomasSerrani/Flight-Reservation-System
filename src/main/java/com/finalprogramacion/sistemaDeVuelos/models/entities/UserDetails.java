@@ -27,6 +27,12 @@ public class UserDetails {
     @Column(name = "card_number")
     private String cardNumber;
 
+    @Column(name = "card_cvv")
+    private String cardCVV;
+
+    @Column(name = "card_expiry")
+    private String cardExpiry;
+
     @Column(name = "cbu_number")
     private String cbuNumber;
 
