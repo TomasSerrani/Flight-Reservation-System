@@ -45,7 +45,7 @@ public class FlightController {
             flightService.createFlight(savedFlight);
             return ResponseEntity.status(HttpStatus.CREATED).body(flightDTO);
         } catch (Exception e) {
-            e.printStackTrace(); // Esto imprimirá la traza de la excepción en los logs
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }

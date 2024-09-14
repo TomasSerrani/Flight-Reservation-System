@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.finalprogramacion.sistemaDeVuelos.collectors.EntityAndDTOConverter.*;
+import static com.finalprogramacion.sistemaDeVuelos.collectors.EntityAndDTOConverter.toUserDetailsDTO;
 
 @RestController
 @RequestMapping("/userdetails")
@@ -58,12 +59,14 @@ public class UserDetailsController {
         return userDetailsService.authenticate(email, password);
     }
 
-    @GetMapping("/email")
-    public ResponseEntity<UserDetailsDTO> findByEmail(@PathVariable String email) {
-        UserDetailsDTO userDetailsDTO = toUserDetailsDTO(userDetailsService.getUserEmail(email));
-        if (userDetailsService.getUserEmail(email) != null) {
-            return ResponseEntity.ok(userDetailsDTO);
-        }
-        return ResponseEntity.notFound().build();
+    @GetMapping("/{email}")
+    public UserDetails findByEmail(@PathVariable String email) {
+        UserDetails userDetails = userDetailsService.getUserEmail(email);
+        return userDetails;
+    }
+    @GetMapping("/current")
+    public UserDetails getCurrentUserDetails(@RequestHeader("Authorization") String token) {
+        UserDetails userDetails = userDetailsService.getCurrentUser(token);
+        return userDetails;
     }
 }

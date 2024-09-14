@@ -12,12 +12,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static com.finalprogramacion.sistemaDeVuelos.collectors.EntityAndDTOConverter.toFlightDTO;
-import static com.finalprogramacion.sistemaDeVuelos.collectors.EntityAndDTOConverter.toUserDTO;
+import static com.finalprogramacion.sistemaDeVuelos.collectors.EntityAndDTOConverter.*;
 
 @ComponentScan(basePackages = "com.finalprogramacion.sistemaDeVuelos")
 public class MainApp {
@@ -34,7 +32,7 @@ public class MainApp {
     private PaymentController paymentController;
     private UserDetailsController userDetailsController;
 
-    private String userEmail;
+    public String userEmail;
 
     public MainApp() {
         initializeContext();
@@ -88,10 +86,10 @@ public class MainApp {
             String email = emailField.getText();
             String password = new String(passwordField.getPassword());
             UserDetails userDetails = userDetailsController.login(email, password);
+            this.userEmail = emailField.getText();
             if (userDetails != null) {
                 // Go to flight search panel
                 cardLayout.show(mainPanel, "FlightSearch");
-                this.userEmail = userDetails.getEmail();
             } else {
                 JOptionPane.showMessageDialog(frame, "Invalid email or password");
             }
@@ -110,7 +108,7 @@ public class MainApp {
     }
 
     private JButton createBackButton() {
-        JButton backButton = new JButton("<-");
+        JButton backButton = new JButton("<- Back");
         backButton.addActionListener(e -> cardLayout.show(mainPanel, "Login"));
         return backButton;
     }
@@ -142,7 +140,7 @@ public class MainApp {
         // Etiqueta y campo de fecha de nacimiento
         JLabel dateOfBirthLabel = new JLabel("Date of birth: DD/MM/YYYY");
         gbc.gridx = 0;
-        gbc.gridy = 1;
+        gbc.gridy = 2;
         gbc.weightx = 0.2;
         registerPanel.add(dateOfBirthLabel, gbc);
         JTextField dateOfBirthField = new JTextField(15);
@@ -153,7 +151,7 @@ public class MainApp {
         // Etiqueta y campo de correo electrónico
         JLabel emailLabel = new JLabel("Email:");
         gbc.gridx = 0;
-        gbc.gridy = 2;
+        gbc.gridy = 3;
         gbc.weightx = 0.2;
         registerPanel.add(emailLabel, gbc);
         JTextField emailField = new JTextField(15);
@@ -164,7 +162,7 @@ public class MainApp {
         // Etiqueta y campo de contraseña
         JLabel passwordLabel = new JLabel("Password:");
         gbc.gridx = 0;
-        gbc.gridy = 3;
+        gbc.gridy = 4;
         gbc.weightx = 0.2;
         registerPanel.add(passwordLabel, gbc);
         JPasswordField passwordField = new JPasswordField(15);
@@ -175,7 +173,7 @@ public class MainApp {
         // Etiqueta y campo de teléfono
         JLabel phoneLabel = new JLabel("Phone:");
         gbc.gridx = 0;
-        gbc.gridy = 4;
+        gbc.gridy = 5;
         gbc.weightx = 0.2;
         registerPanel.add(phoneLabel, gbc);
         JTextField phoneField = new JTextField(15);
@@ -186,7 +184,7 @@ public class MainApp {
         // Botón de registro
         JButton registerButton = new JButton("Register");
         gbc.gridx = 0;
-        gbc.gridy = 5;
+        gbc.gridy = 6;
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.fill = GridBagConstraints.NONE;
@@ -291,7 +289,7 @@ public class MainApp {
         flightList.setCellRenderer((list, value, index, isSelected, cellHasFocus) -> {
             JPanel panel = new JPanel(new GridLayout(1, 3));
             JLabel numLabel = new JLabel("Fligh number: " + value.getFlightNum());
-            JLabel departureLabel = new JLabel("Departure: " + value.getDepartureDate() + value.getDepartureTime());
+            JLabel departureLabel = new JLabel("Departure: " + value.getDepartureDate() + " " + value.getDepartureTime());
             JLabel priceLabel = new JLabel("Price: " + value.getPrice());
 
             panel.add(departureLabel);
@@ -396,22 +394,19 @@ public class MainApp {
 
         bookButton.addActionListener(e -> {
             FlightDTO flightDTO1 = (FlightDTO) bookButton.getClientProperty("flightDTO");
-            UserDetails userDetails = userController.getCurrentUser(userEmail);
+            UserDetailsDTO userDetailsDTO = toUserDetailsDTO(userDetailsController.findByEmail(userEmail));
+            UserDTO currentUserDTO= toUserDTO(userController.getCurrentUser(userDetailsDTO.getId()));
+            ReservationDTO reservation = new ReservationDTO();
+            reservation.setUser(currentUserDTO);
+            reservation.setFlight(flightDTO1);
 
-            if (userDetails != null && userDetails.getUser() != null) {
-                ReservationDTO reservation = new ReservationDTO();
-                reservation.setUser(toUserDTO(userDetails.getUser()));
-                reservation.setFlight(flightDTO1);
-
-                try {
-                    reservationController.createReservation(reservation);
-                    JOptionPane.showMessageDialog(frame, "Flight booked successfully");
-                } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(frame, "Failed to book flight: " + ex.getMessage());
-                }
-            } else {
-                JOptionPane.showMessageDialog(frame, "Please log in first or ensure user details are valid");
+            try {
+                reservationController.createReservation(reservation);
+                JOptionPane.showMessageDialog(frame, "Flight booked successfully");
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(frame, "Failed to book flight: " + ex.getMessage());
             }
+            JOptionPane.showMessageDialog(frame, "Please log in first or ensure user details are valid");
         });
 
         // Agregar botón de retroceso "<-"
@@ -438,7 +433,7 @@ public class MainApp {
 
         refreshButton.addActionListener(e -> {
             // Implement reservation refresh logic
-            UserDetails userDetails = userController.getCurrentUser(userEmail);
+            UserDetails userDetails = userDetailsController.getCurrentUserDetails(userEmail);
             if (userDetails != null) {
                 List<ReservationDTO> reservations = reservationController.getUserReservations(userDetails.getId());
                 reservationList.setListData(reservations.toArray(new Reservation[0]));
@@ -462,7 +457,7 @@ public class MainApp {
 
         refreshButton.addActionListener(e -> {
             // Implement payment refresh logic
-            UserDetails userDetails = userController.getCurrentUser(userEmail);
+            UserDetails userDetails = userDetailsController.getCurrentUserDetails(userEmail);
             if (userDetails != null) {
                 List<PaymentDTO> payments = paymentController.getUserPayments(userDetails.getId());
                 paymentList.setListData(payments.toArray(new Payment[0]));

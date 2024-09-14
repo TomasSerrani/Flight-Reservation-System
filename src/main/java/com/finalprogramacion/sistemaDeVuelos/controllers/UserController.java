@@ -38,8 +38,9 @@ public class UserController {
     }
 
     @GetMapping("/current")
-    public UserDetails getCurrentUser(@RequestHeader("Authorization") String token) {
-        return userService.getCurrentUser(token);
+    public User getCurrentUser(Long id) {
+        User currentUser= userService.getUserById(id);
+        return currentUser;
     }
 
     @PostMapping("/register")
@@ -48,8 +49,6 @@ public class UserController {
         userService.createUser(savedUser);
         return userDTO;
     }
-
-
 
     @PutMapping("/{id}")
     public ResponseEntity<UserDTO> updateUser(@PathVariable Long id, @RequestBody UserDTO userDetails) {
