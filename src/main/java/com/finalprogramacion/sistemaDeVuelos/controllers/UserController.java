@@ -3,6 +3,7 @@ package com.finalprogramacion.sistemaDeVuelos.controllers;
 import com.finalprogramacion.sistemaDeVuelos.collectors.EntityAndDTOConverter;
 import com.finalprogramacion.sistemaDeVuelos.models.dtos.UserDTO;
 import com.finalprogramacion.sistemaDeVuelos.models.entities.User;
+import com.finalprogramacion.sistemaDeVuelos.models.entities.UserDetails;
 import com.finalprogramacion.sistemaDeVuelos.models.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -36,10 +37,9 @@ public class UserController {
         return ResponseEntity.notFound().build();
     }
 
-    @GetMapping("/current/{id}")
-    public User getCurrentUser(Long id) {
-        User currentUser= userService.getUserById(id);
-        return currentUser;
+    @GetMapping("/current")
+    public UserDetails getCurrentUser(@RequestHeader("Authorization") String token) {
+        return userService.getCurrentUser(token);
     }
 
     @PostMapping("/register")
@@ -48,6 +48,8 @@ public class UserController {
         userService.createUser(savedUser);
         return userDTO;
     }
+
+
 
     @PutMapping("/{id}")
     public ResponseEntity<UserDTO> updateUser(@PathVariable Long id, @RequestBody UserDTO userDetails) {

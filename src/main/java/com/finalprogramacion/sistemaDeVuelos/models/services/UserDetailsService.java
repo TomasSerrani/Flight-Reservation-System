@@ -62,4 +62,8 @@ public class UserDetailsService {
         }
         return null;
     }
+    public UserDetails getCurrentUser(String token) {
+        UserDetails userDetails = userDetailsRepository.findByEmail(token);
+        return userDetails;
+    }
 }
