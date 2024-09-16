@@ -16,8 +16,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static com.finalprogramacion.sistemaDeVuelos.collectors.EntityAndDTOConverter.toFlightDTO;
-import static com.finalprogramacion.sistemaDeVuelos.collectors.EntityAndDTOConverter.toUserDTO;
+import static com.finalprogramacion.sistemaDeVuelos.collectors.EntityAndDTOConverter.*;
 
 @ComponentScan(basePackages = "com.finalprogramacion.sistemaDeVuelos")
 public class MainApp {
@@ -385,7 +384,6 @@ public class MainApp {
         gbc.gridx = 1;
         flightDetailsPanel.add(priceValue, gbc);
 
-        // Botón para reservar
         JButton bookButton = new JButton("Book");
         bookButton.putClientProperty("flightDTO", flightDTO);
         gbc.gridx = 0;
@@ -395,26 +393,155 @@ public class MainApp {
         flightDetailsPanel.add(bookButton, gbc);
 
         bookButton.addActionListener(e -> {
-            FlightDTO flightDTO1 = (FlightDTO) bookButton.getClientProperty("flightDTO");
-            UserDetails userDetails = userController.getCurrentUser(userEmail);
+            FlightDTO selectedFlightDTO = (FlightDTO) bookButton.getClientProperty("flightDTO");
+            UserDetails userDetails = userDetailsController.findByEmail(userEmail);
+            User currentUser = userController.getCurrentUser(userDetails.getId());
+            Reservation reservation = new Reservation();
+            reservation.setUser(currentUser);
+            reservation.setFlight(dtoToFlight(selectedFlightDTO));
 
-            if (userDetails != null && userDetails.getUser() != null) {
-                ReservationDTO reservation = new ReservationDTO();
-                reservation.setUser(toUserDTO(userDetails.getUser()));
-                reservation.setFlight(flightDTO1);
+            // Crear un panel para el pago
+            JPanel paymentPanel = new JPanel(new GridBagLayout());
+            GridBagConstraints paymentGbc = new GridBagConstraints();
+            paymentGbc.insets = new Insets(5, 5, 5, 5);
+            paymentGbc.fill = GridBagConstraints.HORIZONTAL;
+
+            JLabel paymentMethodLabel = new JLabel("Select Payment Method:");
+            paymentGbc.gridx = 0;
+            paymentGbc.gridy = 0;
+            paymentGbc.gridwidth = 2;
+            paymentPanel.add(paymentMethodLabel, paymentGbc);
+
+            String[] paymentMethods = {"Credit Card", "Bank Transfer"};
+            JComboBox<String> paymentMethodComboBox = new JComboBox<>(paymentMethods);
+            paymentGbc.gridx = 0;
+            paymentGbc.gridy = 1;
+            paymentGbc.gridwidth = 2;
+            paymentPanel.add(paymentMethodComboBox, paymentGbc);
+
+            // Agregar campo para seleccionar la cantidad de pagos
+            JLabel numberOfPaymentsLabel = new JLabel("Number of Payments:");
+            paymentGbc.gridy = 2;
+            paymentGbc.gridx = 0;
+            paymentGbc.gridwidth = 1;
+            paymentPanel.add(numberOfPaymentsLabel, paymentGbc);
+
+            JSpinner numberOfPaymentsSpinner = new JSpinner(new SpinnerNumberModel(1, 1, 12, 1));
+            paymentGbc.gridx = 1;
+            paymentPanel.add(numberOfPaymentsSpinner, paymentGbc);
+
+            // Panel para campos de tarjeta de crédito
+            JPanel creditCardPanel = new JPanel(new GridBagLayout());
+            GridBagConstraints cardGbc = new GridBagConstraints();
+            cardGbc.insets = new Insets(5, 5, 5, 5);
+            cardGbc.fill = GridBagConstraints.HORIZONTAL;
+
+            JLabel cardNumberLabel = new JLabel("Card Number:");
+            cardGbc.gridx = 0;
+            cardGbc.gridy = 0;
+            creditCardPanel.add(cardNumberLabel, cardGbc);
+
+            JTextField cardNumberField = new JTextField(16);
+            cardGbc.gridx = 1;
+            creditCardPanel.add(cardNumberField, cardGbc);
+
+            JLabel cardExpiryLabel = new JLabel("Expiry Date:");
+            cardGbc.gridx = 0;
+            cardGbc.gridy = 1;
+            creditCardPanel.add(cardExpiryLabel, cardGbc);
+
+            JTextField cardExpiryField = new JTextField(5);
+            cardGbc.gridx = 1;
+            creditCardPanel.add(cardExpiryField, cardGbc);
+
+            JLabel cardCVVLabel = new JLabel("CVV:");
+            cardGbc.gridx = 0;
+            cardGbc.gridy = 2;
+            creditCardPanel.add(cardCVVLabel, cardGbc);
+
+            JTextField cardCVVField = new JTextField(3);
+            cardGbc.gridx = 1;
+            creditCardPanel.add(cardCVVField, cardGbc);
+
+            // Panel para campos de transferencia bancaria
+            JPanel bankTransferPanel = new JPanel(new GridBagLayout());
+            GridBagConstraints bankGbc = new GridBagConstraints();
+            bankGbc.insets = new Insets(5, 5, 5, 5);
+            bankGbc.fill = GridBagConstraints.HORIZONTAL;
+
+            JLabel bankAccountLabel = new JLabel("Bank Account Number:");
+            bankGbc.gridx = 0;
+            bankGbc.gridy = 0;
+            bankTransferPanel.add(bankAccountLabel, bankGbc);
+
+            JTextField bankAccountField = new JTextField(20);
+            bankGbc.gridx = 1;
+            bankTransferPanel.add(bankAccountField, bankGbc);
+
+            JLabel bankNameLabel = new JLabel("Bank Name:");
+            bankGbc.gridx = 0;
+            bankGbc.gridy = 1;
+            bankTransferPanel.add(bankNameLabel, bankGbc);
+
+            JTextField bankNameField = new JTextField(20);
+            bankGbc.gridx = 1;
+            bankTransferPanel.add(bankNameField, bankGbc);
+
+            // Mostrar paneles de pago basado en selección
+            paymentMethodComboBox.addActionListener(event -> {
+                String selectedMethod = (String) paymentMethodComboBox.getSelectedItem();
+                creditCardPanel.setVisible("Credit Card".equals(selectedMethod));
+                bankTransferPanel.setVisible("Bank Transfer".equals(selectedMethod));
+            });
+
+            // Agregar los paneles de entrada de pago
+            paymentGbc.gridy = 3;
+            paymentGbc.gridwidth = 2;
+            paymentPanel.add(creditCardPanel, paymentGbc);
+            paymentPanel.add(bankTransferPanel, paymentGbc);
+
+            // Agregar botón de envío de pago
+            JButton submitPaymentButton = new JButton("Submit Payment");
+            paymentGbc.gridy = 4;
+            paymentGbc.gridwidth = 2;
+            paymentGbc.anchor = GridBagConstraints.CENTER;
+            paymentPanel.add(submitPaymentButton, paymentGbc);
+
+            submitPaymentButton.addActionListener(paymentEvent -> {
+                int numberOfPayments = (Integer) numberOfPaymentsSpinner.getValue();
+                String selectedMethod = (String) paymentMethodComboBox.getSelectedItem();
+
+                if ("Credit Card".equals(selectedMethod)) {
+                    String cardNumber = cardNumberField.getText();
+                    String expiryDate = cardExpiryField.getText();
+                    String cvv = cardCVVField.getText();
+                    // Aquí puedes agregar la lógica para procesar el pago con tarjeta
+                    // Ejemplo: procesarPagoConTarjeta(cardNumber, expiryDate, cvv, numberOfPayments);
+                } else if ("Bank Transfer".equals(selectedMethod)) {
+                    String bankAccount = bankAccountField.getText();
+                    String bankName = bankNameField.getText();
+                    // Aquí puedes agregar la lógica para procesar el pago por transferencia bancaria
+                    // Ejemplo: procesarPagoConTransferencia(bankAccount, bankName, numberOfPayments);
+                }
 
                 try {
-                    reservationController.createReservation(reservation);
-                    JOptionPane.showMessageDialog(frame, "Flight booked successfully");
+                    reservationController.createReservation(toReservationDTO(reservation));
+                    JOptionPane.showMessageDialog(frame, "Flight booked and payment successful");
+                    cardLayout.show(mainPanel, "FlightSearch"); // Volver a la búsqueda de vuelos después del pago
                 } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(frame, "Failed to book flight: " + ex.getMessage());
+                    JOptionPane.showMessageDialog(frame, "Failed to process payment: " + ex.getMessage());
                 }
-            } else {
-                JOptionPane.showMessageDialog(frame, "Please log in first or ensure user details are valid");
-            }
+            });
+
+            // Inicialmente mostrar solo el panel de tarjeta de crédito
+            creditCardPanel.setVisible(true);
+            bankTransferPanel.setVisible(false);
+
+            // Añadir el panel de pago al panel principal
+            mainPanel.add(paymentPanel, "Payment");
+            cardLayout.show(mainPanel, "Payment");
         });
 
-        // Agregar botón de retroceso "<-"
         JButton backButton = new JButton("<- Back");
         gbc.gridx = 0;
         gbc.gridy = 6;
@@ -423,7 +550,6 @@ public class MainApp {
 
         backButton.addActionListener(e -> cardLayout.show(mainPanel, "FlightSearch"));
 
-        // Mostrar el panel de detalles en el CardLayout
         mainPanel.add(flightDetailsPanel, "FlightDetails");
         cardLayout.show(mainPanel, "FlightDetails");
     }
@@ -438,7 +564,7 @@ public class MainApp {
 
         refreshButton.addActionListener(e -> {
             // Implement reservation refresh logic
-            UserDetails userDetails = userController.getCurrentUser(userEmail);
+            UserDetails userDetails = userDetailsController.findByEmail(userEmail);
             if (userDetails != null) {
                 List<ReservationDTO> reservations = reservationController.getUserReservations(userDetails.getId());
                 reservationList.setListData(reservations.toArray(new Reservation[0]));
@@ -462,7 +588,7 @@ public class MainApp {
 
         refreshButton.addActionListener(e -> {
             // Implement payment refresh logic
-            UserDetails userDetails = userController.getCurrentUser(userEmail);
+            UserDetails userDetails = userDetailsController.findByEmail(userEmail);
             if (userDetails != null) {
                 List<PaymentDTO> payments = paymentController.getUserPayments(userDetails.getId());
                 paymentList.setListData(payments.toArray(new Payment[0]));
@@ -476,10 +602,6 @@ public class MainApp {
 
         return userPaymentsPanel;
     }
-
-
-
-
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(MainApp::new);

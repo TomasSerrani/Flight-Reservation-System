@@ -59,11 +59,8 @@ public class UserDetailsController {
     }
 
     @GetMapping("/email")
-    public ResponseEntity<UserDetailsDTO> findByEmail(@PathVariable String email) {
-        UserDetailsDTO userDetailsDTO = toUserDetailsDTO(userDetailsService.getUserEmail(email));
-        if (userDetailsService.getUserEmail(email) != null) {
-            return ResponseEntity.ok(userDetailsDTO);
-        }
-        return ResponseEntity.notFound().build();
+    public UserDetails findByEmail(@PathVariable String email) {
+        UserDetails userDetails = userDetailsService.getUserByEmail(email);
+        return userDetails;
     }
 }

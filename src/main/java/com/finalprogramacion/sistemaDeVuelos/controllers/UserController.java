@@ -38,8 +38,9 @@ public class UserController {
     }
 
     @GetMapping("/current")
-    public UserDetails getCurrentUser(@RequestHeader("Authorization") String token) {
-        return userService.getCurrentUser(token);
+    public User getCurrentUser(@RequestHeader("Authorization") Long token) {
+        User user= userService.getUserById(token);
+        return user;
     }
 
     @PostMapping("/register")
