@@ -12,7 +12,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -73,23 +72,54 @@ public class MainApp {
     }
 
     private JPanel createLoginPanel() {
-        JPanel loginPanel = new JPanel();
-        loginPanel.setLayout(new GridLayout(3, 2));
+        JPanel loginPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        JLabel emailLabel = new JLabel("Email:");
-        JTextField emailField = new JTextField();
-        JLabel passwordLabel = new JLabel("Password:");
-        JPasswordField passwordField = new JPasswordField();
+        // Email
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.weightx = 0.3;
+        loginPanel.add(new JLabel("Email:"), gbc);
+
+        gbc.gridx = 1;
+        gbc.weightx = 0.7;
+        JTextField emailField = new JTextField(15);
+        loginPanel.add(emailField, gbc);
+
+        // Password
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.weightx = 0.3;
+        loginPanel.add(new JLabel("Password:"), gbc);
+
+        gbc.gridx = 1;
+        gbc.weightx = 0.7;
+        JPasswordField passwordField = new JPasswordField(15);
+        loginPanel.add(passwordField, gbc);
+
+        // Login Button
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.gridwidth = 1;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.CENTER;
         JButton loginButton = new JButton("Login");
-        JButton registerButton = new JButton("Register");
+        loginPanel.add(loginButton, gbc);
 
+        // Register Button
+        gbc.gridx = 1;
+        gbc.anchor = GridBagConstraints.CENTER;
+        JButton registerButton = new JButton("Register");
+        loginPanel.add(registerButton, gbc);
+
+        // Login Logic
         loginButton.addActionListener(e -> {
-            // Implement login logic
             String email = emailField.getText();
             String password = new String(passwordField.getPassword());
             UserDetails userDetails = userDetailsController.login(email, password);
             if (userDetails != null) {
-                // Go to main menu
                 cardLayout.show(mainPanel, "MainMenu");
                 this.userEmail = userDetails.getEmail();
             } else {
@@ -97,203 +127,191 @@ public class MainApp {
             }
         });
 
-        loginButton.addActionListener(e -> {
-            // Implement login logic
-            String email = emailField.getText();
-            String password = new String(passwordField.getPassword());
-            UserDetails userDetails = userDetailsController.login(email, password);
-            if (userDetails != null) {
-                // Go to flight search panel
-                cardLayout.show(mainPanel, "FlightSearch");
-                this.userEmail = userDetails.getEmail();
-            } else {
-                JOptionPane.showMessageDialog(frame, "Invalid email or password");
-            }
-        });
-
+        // Go to Register Panel
         registerButton.addActionListener(e -> cardLayout.show(mainPanel, "Register"));
-
-        loginPanel.add(emailLabel);
-        loginPanel.add(emailField);
-        loginPanel.add(passwordLabel);
-        loginPanel.add(passwordField);
-        loginPanel.add(loginButton);
-        loginPanel.add(registerButton);
 
         return loginPanel;
     }
 
+
     private JPanel createRegisterPanel() {
         JPanel registerPanel = new JPanel(new GridBagLayout());
-
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        // Botón de retroceso
+        // Back Button
+        JButton backButton = new JButton("Back");
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.WEST;
-        registerPanel.add(createBackButton(), gbc); // Añadir el botón "<-"
+        registerPanel.add(backButton, gbc);
 
-        // Etiqueta y campo de nombre
+        // Name
         gbc.gridy++;
         gbc.gridwidth = 1;
         JLabel nameLabel = new JLabel("Name:");
         registerPanel.add(nameLabel, gbc);
 
-        JTextField nameField = new JTextField(15);
         gbc.gridx = 1;
+        JTextField nameField = new JTextField(15);
         registerPanel.add(nameField, gbc);
 
-        // Etiqueta y campo de fecha de nacimiento
-        JLabel dateOfBirthLabel = new JLabel("Date of birth: DD/MM/YYYY");
+        // Date of Birth
         gbc.gridx = 0;
-        gbc.gridy = 1;
-        gbc.weightx = 0.2;
+        gbc.gridy++;
+        JLabel dateOfBirthLabel = new JLabel("Date of birth: DD/MM/YYYY");
         registerPanel.add(dateOfBirthLabel, gbc);
-        JTextField dateOfBirthField = new JTextField(15);
+
         gbc.gridx = 1;
-        gbc.weightx = 0.8;
+        JTextField dateOfBirthField = new JTextField(15);
         registerPanel.add(dateOfBirthField, gbc);
 
-        // Etiqueta y campo de correo electrónico
-        JLabel emailLabel = new JLabel("Email:");
+        // Email
         gbc.gridx = 0;
-        gbc.gridy = 2;
-        gbc.weightx = 0.2;
+        gbc.gridy++;
+        JLabel emailLabel = new JLabel("Email:");
         registerPanel.add(emailLabel, gbc);
-        JTextField emailField = new JTextField(15);
+
         gbc.gridx = 1;
-        gbc.weightx = 0.8;
+        JTextField emailField = new JTextField(15);
         registerPanel.add(emailField, gbc);
 
-        // Etiqueta y campo de contraseña
-        JLabel passwordLabel = new JLabel("Password:");
+        // Password
         gbc.gridx = 0;
-        gbc.gridy = 3;
-        gbc.weightx = 0.2;
+        gbc.gridy++;
+        JLabel passwordLabel = new JLabel("Password:");
         registerPanel.add(passwordLabel, gbc);
-        JPasswordField passwordField = new JPasswordField(15);
+
         gbc.gridx = 1;
-        gbc.weightx = 0.8;
+        JPasswordField passwordField = new JPasswordField(15);
         registerPanel.add(passwordField, gbc);
 
-        // Etiqueta y campo de teléfono
-        JLabel phoneLabel = new JLabel("Phone:");
+        // Phone
         gbc.gridx = 0;
-        gbc.gridy = 4;
-        gbc.weightx = 0.2;
+        gbc.gridy++;
+        JLabel phoneLabel = new JLabel("Phone:");
         registerPanel.add(phoneLabel, gbc);
-        JTextField phoneField = new JTextField(15);
+
         gbc.gridx = 1;
-        gbc.weightx = 0.8;
+        JTextField phoneField = new JTextField(15);
         registerPanel.add(phoneField, gbc);
 
-        // Botón de registro
-        JButton registerButton = new JButton("Register");
+        // Register Button
         gbc.gridx = 0;
-        gbc.gridy = 5;
+        gbc.gridy++;
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
-        gbc.fill = GridBagConstraints.NONE;
+        JButton registerButton = new JButton("Register");
         registerPanel.add(registerButton, gbc);
 
         registerButton.addActionListener(e -> {
-            // Validación y registro de usuario
             String name = nameField.getText().trim();
             String email = emailField.getText().trim();
             String password = new String(passwordField.getPassword()).trim();
             String phone = phoneField.getText().trim();
             String dateOfBirthText = dateOfBirthField.getText().trim();
+
             if (name.isEmpty() || email.isEmpty() || password.isEmpty() || phone.isEmpty() || dateOfBirthText.isEmpty()) {
                 JOptionPane.showMessageDialog(frame, "All fields are required.", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            Date dateOfBirth;
-            SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-
             try {
-                dateOfBirth = dateFormat.parse(dateOfBirthText);
-            } catch (ParseException ex) {
-                JOptionPane.showMessageDialog(frame, "Invalid date format. Please use DD/MM/YYYY.", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
+                Date dateOfBirth = new SimpleDateFormat("dd/MM/yyyy").parse(dateOfBirthText);
+                UserDetailsDTO createdUserDetails = new UserDetailsDTO(email, password, phone);
+                UserDTO createdUser = new UserDTO(name, dateOfBirth, createdUserDetails);
 
-            UserDetailsDTO createdUserDetails = new UserDetailsDTO(email, password, phone);
-            UserDTO createdUser = new UserDTO(name, dateOfBirth, createdUserDetails);
-
-            try {
-                if (userDetailsController.findByEmail(createdUserDetails.getEmail()) == null){
+                if (userDetailsController.findByEmail(createdUserDetails.getEmail()) == null) {
                     userController.createUser(createdUser);
                     JOptionPane.showMessageDialog(frame, "Registration successful");
+                    cardLayout.show(mainPanel, "Login");
+                } else {
+                    JOptionPane.showMessageDialog(frame, "Email already used", "Error", JOptionPane.ERROR_MESSAGE);
                 }
-                else {
-                    JOptionPane.showMessageDialog(frame, "Registration failed: Email already used", "Error", JOptionPane.ERROR_MESSAGE);
-                }
-                cardLayout.show(mainPanel, "Login");
+            } catch (ParseException ex) {
+                JOptionPane.showMessageDialog(frame, "Invalid date format. Use DD/MM/YYYY.", "Error", JOptionPane.ERROR_MESSAGE);
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(frame, "Registration failed: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
 
+        // Back Button Action
+        backButton.addActionListener(e -> cardLayout.show(mainPanel, "Login"));
+
         return registerPanel;
     }
 
-    private JPanel createMainMenuPanel() {
-        JPanel mainMenuPanel = new JPanel(new GridLayout(3, 1));
 
+    private JPanel createMainMenuPanel() {
+        JPanel mainMenuPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10); // Margen entre botones
+        gbc.fill = GridBagConstraints.HORIZONTAL; // Los botones llenarán el espacio horizontalmente
+
+        // Crear y estilizar los botones
         JButton searchFlightsButton = new JButton("Search Flights");
+        styleButton(searchFlightsButton);
         searchFlightsButton.addActionListener(e -> cardLayout.show(mainPanel, "FlightSearch"));
 
         JButton viewReservationsButton = new JButton("View Reservations");
+        styleButton(viewReservationsButton);
         viewReservationsButton.addActionListener(e -> cardLayout.show(mainPanel, "UserReservations"));
 
         JButton viewPaymentsButton = new JButton("View Payments");
+        styleButton(viewPaymentsButton);
         viewPaymentsButton.addActionListener(e -> cardLayout.show(mainPanel, "UserPayments"));
 
-        mainMenuPanel.add(searchFlightsButton);
-        mainMenuPanel.add(viewReservationsButton);
-        mainMenuPanel.add(viewPaymentsButton);
+        // Añadir los botones al panel
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        mainMenuPanel.add(searchFlightsButton, gbc);
+
+        gbc.gridy = 1;
+        mainMenuPanel.add(viewReservationsButton, gbc);
+
+        gbc.gridy = 2;
+        mainMenuPanel.add(viewPaymentsButton, gbc);
 
         return mainMenuPanel;
     }
 
-    private JButton createBackButton() {
+    private void styleButton(JButton button) {
+        // Estilizar los botones para que sean más pequeños y visualmente atractivos
+        button.setPreferredSize(new Dimension(150, 40)); // Tamaño personalizado
+        button.setFocusPainted(false); // Quitar borde al hacer clic
+        button.setBackground(new Color(7, 7, 7)); // Color de fondo
+        button.setForeground(Color.WHITE); // Color del texto
+        button.setFont(new Font("Arial", Font.BOLD, 14)); // Fuente personalizada
+        button.setBorder(BorderFactory.createEmptyBorder(5, 15, 5, 15)); // Añadir márgenes internos
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR)); // Cambiar el cursor al pasar sobre el botón
+    }
+
+    // Método para crear el botón de retroceso
+    private JButton createBackButton(String previousPanel) {
         JButton backButton = new JButton("<-");
-        backButton.addActionListener(e -> cardLayout.show(mainPanel, "Login"));
+        backButton.addActionListener(e -> {
+            // Cambia al panel anterior
+            cardLayout.show(mainPanel, previousPanel);
+        });
         return backButton;
     }
 
+    // Método para crear el panel de búsqueda de vuelos
     private JPanel createFlightSearchPanel() {
         JPanel flightSearchPanel = new JPanel(new BorderLayout());
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 
-        // Botón para regresar al menú principal
+        // Crear panel para los botones de navegación
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton backButtonToMainMenu = new JButton("Main Menu");
         backButtonToMainMenu.addActionListener(e -> cardLayout.show(mainPanel, "MainMenu"));
-
-        // Botón para volver atrás (por ejemplo, regresar al menú anterior)
-        JButton backButton = new JButton("Back");
-        backButton.addActionListener(e -> cardLayout.show(mainPanel, "PreviousPanel")); // Cambia "PreviousPanel" según el panel anterior
-
-        // Añadir botones al panel inferior
-        buttonPanel.add(backButton);
         buttonPanel.add(backButtonToMainMenu);
 
-        flightSearchPanel.add(buttonPanel, BorderLayout.SOUTH);
-
-        // Añadir el botón "<-" en la parte superior
-        //flightSearchPanel.add(createBackButton(), BorderLayout.NORTH);
-
-        // Panel for search fields
+        // Crear panel para los campos de búsqueda
         JPanel searchPanel = new JPanel(new GridLayout(3, 2));
-
         JLabel originLabel = new JLabel("Origin:");
         JComboBox<String> originComboBox = new JComboBox<>();
-
         JLabel destinationLabel = new JLabel("Destination:");
         JComboBox<String> destinationComboBox = new JComboBox<>();
         JButton searchButton = new JButton("Search");
@@ -305,66 +323,55 @@ public class MainApp {
         searchPanel.add(new JLabel()); // Empty cell
         searchPanel.add(searchButton);
 
+        // Configurar la JList para mostrar los vuelos
         JList<FlightDTO> flightList = new JList<>();
-        flightSearchPanel.add(searchPanel, BorderLayout.NORTH);
-        flightSearchPanel.add(new JScrollPane(flightList), BorderLayout.CENTER);
+        JScrollPane flightListScrollPane = new JScrollPane(flightList);
 
-        // Set preferred size for button
-        searchButton.setPreferredSize(new Dimension(100, 30));
+        // Crear panel para el botón de selección de vuelo
+        JPanel selectFlightPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JButton selectFlightButton = new JButton("Select Flight");
+        selectFlightPanel.add(selectFlightButton);
 
-        // Populate JComboBoxes with airport names
-        populateFlightComboBoxes(originComboBox, destinationComboBox);
+        // Añadir los componentes al panel principal
+        flightSearchPanel.add(buttonPanel, BorderLayout.NORTH);
+        flightSearchPanel.add(searchPanel, BorderLayout.CENTER);
+        flightSearchPanel.add(flightListScrollPane, BorderLayout.EAST);
+        flightSearchPanel.add(selectFlightPanel, BorderLayout.SOUTH);
 
         searchButton.addActionListener(e -> {
-            // Get selected origin and destination
+            // Obtener origen y destino seleccionados
             String origin = (String) originComboBox.getSelectedItem();
             String destination = (String) destinationComboBox.getSelectedItem();
 
             if (origin != null && destination != null) {
-                // Find flights that match both origin and destination
+                // Buscar vuelos
                 List<FlightDTO> matchingFlights = flightController.searchFlightsByOriginAndDestination(origin, destination);
 
-                // Display the flights in the JList
+                // Mostrar los vuelos en la JList
                 flightList.setListData(matchingFlights.toArray(new FlightDTO[0]));
             } else {
-                // Handle case where either origin or destination is not selected
-                flightList.setListData(new FlightDTO[0]); // Clear the list
+                // Limpiar la lista si no hay selección válida
+                flightList.setListData(new FlightDTO[0]);
             }
-        });
-        // Agregar el botón "Seleccionar vuelo"
-        JButton selectFlightButton = new JButton("Seleccionar vuelo");
-        flightSearchPanel.add(selectFlightButton, BorderLayout.SOUTH);
-
-        // Configurar el ListCellRenderer para mostrar datos adicionales
-        flightList.setCellRenderer((list, value, index, isSelected, cellHasFocus) -> {
-            JPanel panel = new JPanel(new GridLayout(1, 3));
-            JLabel numLabel = new JLabel("Fligh number: " + value.getFlightNum());
-            JLabel departureLabel = new JLabel("Departure: " + value.getDepartureDate() + value.getDepartureTime());
-            JLabel priceLabel = new JLabel("Price: " + value.getPrice());
-
-            panel.add(departureLabel);
-            panel.add(priceLabel);
-
-            if (isSelected) {
-                panel.setBackground(list.getSelectionBackground());
-                panel.setForeground(list.getSelectionForeground());
-            } else {
-                panel.setBackground(list.getBackground());
-                panel.setForeground(list.getForeground());
-            }
-
-            return panel;
         });
 
         selectFlightButton.addActionListener(e -> {
             FlightDTO selectedFlight = flightList.getSelectedValue();
             if (selectedFlight != null) {
-                showFlightDetails(selectedFlight);
+                JPanel flightDetailsPanel = showFlightDetails(selectedFlight);
+                cardLayout.show(mainPanel, "FlightDetails");
+                mainPanel.remove(flightDetailsPanel);
+                mainPanel.add(flightDetailsPanel, "FlightDetails");
+            } else {
+                JOptionPane.showMessageDialog(flightSearchPanel, "Please select a flight.");
             }
         });
 
+        populateFlightComboBoxes(originComboBox, destinationComboBox);
+
         return flightSearchPanel;
     }
+
 
     private void populateFlightComboBoxes(JComboBox<String> originComboBox, JComboBox<String> destinationComboBox) {
         // Obtener la lista de vuelos desde el servicio
@@ -379,7 +386,7 @@ public class MainApp {
         }
     }
 
-    private void showFlightDetails(FlightDTO flightDTO) {
+    private JPanel showFlightDetails(FlightDTO flightDTO) {
         // Crear un nuevo panel de detalles de vuelo
         JPanel flightDetailsPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -618,6 +625,7 @@ public class MainApp {
 
         mainPanel.add(flightDetailsPanel, "FlightDetails");
         cardLayout.show(mainPanel, "FlightDetails");
+        return flightDetailsPanel;
     }
 
     private JPanel createUserReservationsPanel() {
