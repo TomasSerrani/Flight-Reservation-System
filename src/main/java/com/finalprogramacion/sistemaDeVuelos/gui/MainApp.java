@@ -58,6 +58,7 @@ public class MainApp {
 
         mainPanel.add(createLoginPanel(), "Login");
         mainPanel.add(createRegisterPanel(), "Register");
+        mainPanel.add(createMainMenuPanel(), "MainMenu");
         mainPanel.add(createFlightSearchPanel(), "FlightSearch");
         mainPanel.add(createUserReservationsPanel(), "UserReservations");
         mainPanel.add(createUserPaymentsPanel(), "UserPayments");
@@ -88,6 +89,20 @@ public class MainApp {
             String password = new String(passwordField.getPassword());
             UserDetails userDetails = userDetailsController.login(email, password);
             if (userDetails != null) {
+                // Go to main menu
+                cardLayout.show(mainPanel, "MainMenu");
+                this.userEmail = userDetails.getEmail();
+            } else {
+                JOptionPane.showMessageDialog(frame, "Invalid email or password");
+            }
+        });
+
+        loginButton.addActionListener(e -> {
+            // Implement login logic
+            String email = emailField.getText();
+            String password = new String(passwordField.getPassword());
+            UserDetails userDetails = userDetailsController.login(email, password);
+            if (userDetails != null) {
                 // Go to flight search panel
                 cardLayout.show(mainPanel, "FlightSearch");
                 this.userEmail = userDetails.getEmail();
@@ -106,12 +121,6 @@ public class MainApp {
         loginPanel.add(registerButton);
 
         return loginPanel;
-    }
-
-    private JButton createBackButton() {
-        JButton backButton = new JButton("<-");
-        backButton.addActionListener(e -> cardLayout.show(mainPanel, "Login"));
-        return backButton;
     }
 
     private JPanel createRegisterPanel() {
@@ -233,11 +242,51 @@ public class MainApp {
         return registerPanel;
     }
 
+    private JPanel createMainMenuPanel() {
+        JPanel mainMenuPanel = new JPanel(new GridLayout(3, 1));
+
+        JButton searchFlightsButton = new JButton("Search Flights");
+        searchFlightsButton.addActionListener(e -> cardLayout.show(mainPanel, "FlightSearch"));
+
+        JButton viewReservationsButton = new JButton("View Reservations");
+        viewReservationsButton.addActionListener(e -> cardLayout.show(mainPanel, "UserReservations"));
+
+        JButton viewPaymentsButton = new JButton("View Payments");
+        viewPaymentsButton.addActionListener(e -> cardLayout.show(mainPanel, "UserPayments"));
+
+        mainMenuPanel.add(searchFlightsButton);
+        mainMenuPanel.add(viewReservationsButton);
+        mainMenuPanel.add(viewPaymentsButton);
+
+        return mainMenuPanel;
+    }
+
+    private JButton createBackButton() {
+        JButton backButton = new JButton("<-");
+        backButton.addActionListener(e -> cardLayout.show(mainPanel, "Login"));
+        return backButton;
+    }
+
     private JPanel createFlightSearchPanel() {
         JPanel flightSearchPanel = new JPanel(new BorderLayout());
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+
+        // Botón para regresar al menú principal
+        JButton backButtonToMainMenu = new JButton("Main Menu");
+        backButtonToMainMenu.addActionListener(e -> cardLayout.show(mainPanel, "MainMenu"));
+
+        // Botón para volver atrás (por ejemplo, regresar al menú anterior)
+        JButton backButton = new JButton("Back");
+        backButton.addActionListener(e -> cardLayout.show(mainPanel, "PreviousPanel")); // Cambia "PreviousPanel" según el panel anterior
+
+        // Añadir botones al panel inferior
+        buttonPanel.add(backButton);
+        buttonPanel.add(backButtonToMainMenu);
+
+        flightSearchPanel.add(buttonPanel, BorderLayout.SOUTH);
 
         // Añadir el botón "<-" en la parte superior
-        flightSearchPanel.add(createBackButton(), BorderLayout.NORTH);
+        //flightSearchPanel.add(createBackButton(), BorderLayout.NORTH);
 
         // Panel for search fields
         JPanel searchPanel = new JPanel(new GridLayout(3, 2));
@@ -330,13 +379,36 @@ public class MainApp {
         }
     }
 
-
     private void showFlightDetails(FlightDTO flightDTO) {
         // Crear un nuevo panel de detalles de vuelo
         JPanel flightDetailsPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        // Crear panel para los botones (volver atrás y menú principal)
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+
+        // Botón para volver atrás (por ejemplo, volver a la lista de vuelos)
+        JButton backButton = new JButton("Back");
+        backButton.addActionListener(e -> cardLayout.show(mainPanel, "FlightSearch"));
+
+        // Botón para regresar al menú principal
+        JButton backButtonToMainMenu = new JButton("Main Menu");
+        backButtonToMainMenu.addActionListener(e -> cardLayout.show(mainPanel, "MainMenu"));
+
+        // Añadir botones al panel de botones
+        buttonPanel.add(backButton);
+        buttonPanel.add(backButtonToMainMenu);
+
+        gbc.gridx = 0;
+        gbc.gridy = 6;
+        gbc.gridwidth = 2;
+        flightDetailsPanel.add(buttonPanel, gbc);
+
+        // Mostrar el panel de detalles en el CardLayout
+        mainPanel.add(flightDetailsPanel, "FlightDetails");
+        cardLayout.show(mainPanel, "FlightDetails");
 
         // Etiquetas para los detalles del vuelo
         JLabel flightNumLabel = new JLabel("Flight Number:");
@@ -542,18 +614,11 @@ public class MainApp {
             cardLayout.show(mainPanel, "Payment");
         });
 
-        JButton backButton = new JButton("<- Back");
-        gbc.gridx = 0;
-        gbc.gridy = 6;
-        gbc.gridwidth = 2;
-        flightDetailsPanel.add(backButton, gbc);
-
         backButton.addActionListener(e -> cardLayout.show(mainPanel, "FlightSearch"));
 
         mainPanel.add(flightDetailsPanel, "FlightDetails");
         cardLayout.show(mainPanel, "FlightDetails");
     }
-
 
     private JPanel createUserReservationsPanel() {
         JPanel userReservationsPanel = new JPanel();
