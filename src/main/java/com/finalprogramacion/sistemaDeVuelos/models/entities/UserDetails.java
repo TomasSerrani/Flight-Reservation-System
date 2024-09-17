@@ -36,16 +36,30 @@ public class UserDetails {
     @Column(name = "cbu_number")
     private String cbuNumber;
 
+    @Column(name = "bank_name")
+    private String bankName;
+
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
-    public UserDetails(Long id, String password, String phoneNumber, String cardNumber, String cbuNumber, User user) {
-        this.id = id;
+    public void updateCardDetails(String expiryDate, String cardNumber, String cvv) {
+        this.cardExpiry = expiryDate;
+        this.cardNumber = cardNumber;
+        this.cardCVV = cvv;
+    }
+    public void updateBankDetails(String bankName, String cbuNumber) {
+        this.bankName = bankName;
+        this.cbuNumber = cbuNumber;
+    }
+
+    public UserDetails( String email, String password, String phoneNumber, String cardExpiry, String cardNumber, String cardCVV, User user) {
+        this.email = email;
         this.password = password;
         this.phoneNumber = phoneNumber;
+        this.password = cardCVV;
+        this.phoneNumber = cardExpiry;
         this.cardNumber = cardNumber;
-        this.cbuNumber = cbuNumber;
         this.user = user;
     }
 
@@ -59,4 +73,6 @@ public class UserDetails {
         this.password = password;
         this.phoneNumber = phoneNumber;
     }
+
+
 }

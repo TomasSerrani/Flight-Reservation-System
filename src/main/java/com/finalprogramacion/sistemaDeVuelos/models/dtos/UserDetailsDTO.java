@@ -14,6 +14,7 @@ public class UserDetailsDTO {
     private String phoneNumber;
     private String cardNumber;
     private String cbuNumber;
+    private String bankName;
     private Long userId;
     private String cardCVV;
     private String cardExpiry;

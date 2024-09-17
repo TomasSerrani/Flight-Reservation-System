@@ -39,7 +39,6 @@ public class PaymentService {
             Payment existingPayment = payment.get();
             existingPayment.setNumber(paymentDetails.getNumber());
             existingPayment.setAmountOfPayments(paymentDetails.getAmountOfPayments());
-            existingPayment.setState(paymentDetails.getState());
             existingPayment.setType(existingPayment.getType());
 
             return paymentRepository.save(existingPayment);
@@ -58,5 +57,9 @@ public class PaymentService {
     public List<Payment> getUserPayments(Long id){
         User user= userRepository.getReferenceById(id);
         return user.getPayments();
+    }
+
+    public Payment getByPaymentNumber(Long paymentNumber){
+        return paymentRepository.findByNumber(paymentNumber);
     }
 }

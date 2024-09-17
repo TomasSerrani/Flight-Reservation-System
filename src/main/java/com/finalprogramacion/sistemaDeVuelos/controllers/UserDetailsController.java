@@ -44,6 +44,18 @@ public class UserDetailsController {
         return ResponseEntity.status(HttpStatus.CREATED).body(userDetails);
     }
 
+    @PutMapping("/{id}")
+    public UserDetailsDTO update(@PathVariable Long id, @RequestBody UserDetailsDTO userDetails) {
+        UserDetails existingUserDetails = userDetailsService.getUserDetailsById(id);
+        if (existingUserDetails != null) {
+            UserDetails updatedUserDetails = EntityAndDTOConverter.dtoToUserDetails(userDetails);
+            updatedUserDetails.setId(id);
+            userDetailsService.updateUserDetails(id,updatedUserDetails);
+            return toUserDetailsDTO(updatedUserDetails);
+        }
+        return null;
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteById(@PathVariable Long id) {
         if (userDetailsService.getUserDetailsById(id) != null) {

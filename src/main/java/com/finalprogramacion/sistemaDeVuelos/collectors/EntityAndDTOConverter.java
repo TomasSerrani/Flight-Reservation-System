@@ -99,6 +99,7 @@ public class EntityAndDTOConverter {
         dto.setPhoneNumber(userDetails.getPhoneNumber());
         if (userDetails.getCbuNumber() != null){
             dto.setCbuNumber(userDetails.getCbuNumber());
+            dto.setBankName(userDetails.getBankName());
         } if(userDetails.getCardNumber() != null) {
             dto.setCardNumber(userDetails.getCardNumber());
             dto.setCardCVV(userDetails.getCardCVV());
@@ -115,6 +116,7 @@ public class EntityAndDTOConverter {
         entity.setPhoneNumber(userDetailsDTO.getPhoneNumber());
         if (userDetailsDTO.getCbuNumber() != null){
             entity.setCbuNumber(userDetailsDTO.getCbuNumber());
+            entity.setBankName(userDetailsDTO.getBankName());
         } if(userDetailsDTO.getCardNumber() != null) {
         entity.setCardNumber(userDetailsDTO.getCardNumber());
         entity.setCardCVV(userDetailsDTO.getCardCVV());
@@ -126,7 +128,6 @@ public class EntityAndDTOConverter {
     public static PaymentDTO toPaymentDTO(Payment payment) {
         PaymentDTO dto = new PaymentDTO();
         dto.setId(payment.getId());
-        dto.setState(payment.getState());
         dto.setType(payment.getType());
         dto.setNumber(payment.getNumber());
         dto.setAmountOfPayments(payment.getAmountOfPayments());
@@ -137,7 +138,6 @@ public class EntityAndDTOConverter {
     public static Payment dtoToPayment(PaymentDTO paymentDTO) {
         Payment entity = new Payment();
         entity.setId(paymentDTO.getId());
-        entity.setState(paymentDTO.getState());
         entity.setType(paymentDTO.getType());
         entity.setNumber(paymentDTO.getNumber());
         entity.setAmountOfPayments(paymentDTO.getAmountOfPayments());
@@ -181,7 +181,6 @@ public class EntityAndDTOConverter {
                 PaymentDTO paymentDTO= new PaymentDTO();
                 paymentDTO.setType(payment.getType());
                 paymentDTO.setNumber(payment.getNumber());
-                paymentDTO.setState(payment.getState());
                 paymentDTO.setId(payment.getId());
                 paymentDTO.setAmountOfPayments(payment.getAmountOfPayments());
                 return paymentDTO;
@@ -215,7 +214,6 @@ public class EntityAndDTOConverter {
                 Payment payment= new Payment();
                 payment.setType(paymentDTO.getType());
                 payment.setNumber(paymentDTO.getNumber());
-                payment.setState(paymentDTO.getState());
                 payment.setId(paymentDTO.getId());
                 payment.setAmountOfPayments(paymentDTO.getAmountOfPayments());
                 return payment;

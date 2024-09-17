@@ -50,8 +50,6 @@ public class UserController {
         return userDTO;
     }
 
-
-
     @PutMapping("/{id}")
     public ResponseEntity<UserDTO> updateUser(@PathVariable Long id, @RequestBody UserDTO userDetails) {
         User updatedUser = dtoToUser(userDetails);

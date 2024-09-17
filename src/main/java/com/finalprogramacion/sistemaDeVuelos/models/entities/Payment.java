@@ -21,9 +21,6 @@ public class Payment {
     @Column(name = "type")
     private String type;
 
-    @Column(name = "state")
-    private String state;
-
     @Column(name = "amount_of_payments")
     private int amountOfPayments;
 
@@ -34,20 +31,20 @@ public class Payment {
     @OneToOne(mappedBy = "payment")
     private Reservation reservation;
 
-    public Payment(Long id, Long number, String type, String state, int amountOfPayments, User user, Reservation reservation) {
+
+
+    public Payment(Long id, Long number, String type, int amountOfPayments, User user, Reservation reservation) {
         this.id = id;
         this.number = number;
         this.type = type;
-        this.state = state;
         this.amountOfPayments = amountOfPayments;
         this.user = user;
         this.reservation = reservation;
     }
 
-    public Payment(Long number, String type, String state, int amountOfPayments, User user) {
+    public Payment(Long number, String type, int amountOfPayments, User user) {
         this.number = number;
         this.type = type;
-        this.state = state;
         this.amountOfPayments = amountOfPayments;
         this.user = user;
     }
