@@ -131,8 +131,12 @@ public class EntityAndDTOConverter {
         dto.setType(payment.getType());
         dto.setNumber(payment.getNumber());
         dto.setAmountOfPayments(payment.getAmountOfPayments());
-        dto.setReservation(toReservationDTO(payment.getReservation()));
-        dto.setUser(toUserDTO(payment.getUser()));
+        if(payment.getReservation() != null) {
+            dto.setReservation(toReservationDTO(payment.getReservation()));
+        }
+        if(payment.getUser() != null) {
+            dto.setUser(toUserDTO(payment.getUser()));
+        }
         return dto;
     }
     public static Payment dtoToPayment(PaymentDTO paymentDTO) {
@@ -141,8 +145,12 @@ public class EntityAndDTOConverter {
         entity.setType(paymentDTO.getType());
         entity.setNumber(paymentDTO.getNumber());
         entity.setAmountOfPayments(paymentDTO.getAmountOfPayments());
-        entity.setReservation(dtoToReservation(paymentDTO.getReservation()));
-        entity.setUser(dtoToUser(paymentDTO.getUser()));
+        if(paymentDTO.getReservation() != null) {
+            entity.setReservation(dtoToReservation(paymentDTO.getReservation()));
+        }
+        if(paymentDTO.getUser() != null) {
+            entity.setUser(dtoToUser(paymentDTO.getUser()));
+        }
         return entity;
     }
 
@@ -152,9 +160,15 @@ public class EntityAndDTOConverter {
         dto.setState(reservation.getState());
         dto.setDate(reservation.getDate());
         dto.setNumber(reservation.getNumber());
-        dto.setFlight(toFlightDTO(reservation.getFlight()));
-        dto.setPayment(toPaymentDTO(reservation.getPayment()));
-        dto.setUser(toUserDTO(reservation.getUser()));
+        if (reservation.getFlight() != null) {
+            dto.setFlight(toFlightDTO(reservation.getFlight()));
+        }
+        if (reservation.getPayment() != null) {
+            dto.setPayment(toPaymentDTO(reservation.getPayment()));
+        }
+        if(reservation.getUser() != null) {
+            dto.setUser(toUserDTO(reservation.getUser()));
+        }
         return dto;
     }
 
@@ -164,9 +178,15 @@ public class EntityAndDTOConverter {
         entity.setState(reservationDTO.getState());
         entity.setDate(reservationDTO.getDate());
         entity.setNumber(reservationDTO.getNumber());
-        entity.setFlight(dtoToFlight(reservationDTO.getFlight()));
-        entity.setPayment(dtoToPayment(reservationDTO.getPayment()));
-        entity.setUser(dtoToUser(reservationDTO.getUser()));
+        if (reservationDTO.getFlight() != null) {
+            entity.setFlight(dtoToFlight(reservationDTO.getFlight()));
+        }
+        if (reservationDTO.getPayment() != null) {
+            entity.setPayment(dtoToPayment(reservationDTO.getPayment()));
+        }
+        if(reservationDTO.getUser() != null) {
+            entity.setUser(dtoToUser(reservationDTO.getUser()));
+        }
         return entity;
     }
     public static UserDTO toUserDTO(User user) {
@@ -174,8 +194,9 @@ public class EntityAndDTOConverter {
         dto.setId(user.getId());
         dto.setName(user.getName());
         dto.setDateOfBirth(user.getDateOfBirth());
-        dto.setUserDetails(toUserDetailsDTO(user.getUserDetails()));
-
+        if(user.getUserDetails() != null) {
+            dto.setUserDetails(toUserDetailsDTO(user.getUserDetails()));
+        }
         if (user.getPayments() != null) {
             List<PaymentDTO> paymentDTOList = user.getPayments().stream().map(payment -> {
                 PaymentDTO paymentDTO= new PaymentDTO();
@@ -207,7 +228,9 @@ public class EntityAndDTOConverter {
         entity.setId(userDTO.getId());
         entity.setName(userDTO.getName());
         entity.setDateOfBirth(userDTO.getDateOfBirth());
-        entity.setUserDetails(dtoToUserDetails(userDTO.getUserDetails()));
+        if(userDTO.getUserDetails() != null) {
+            entity.setUserDetails(dtoToUserDetails(userDTO.getUserDetails()));
+        }
 
         if (userDTO.getPayments() != null) {
             List<Payment> paymentList = userDTO.getPayments().stream().map(paymentDTO -> {

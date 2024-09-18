@@ -2,7 +2,6 @@ package com.finalprogramacion.sistemaDeVuelos.controllers;
 
 import com.finalprogramacion.sistemaDeVuelos.collectors.EntityAndDTOConverter;
 import com.finalprogramacion.sistemaDeVuelos.models.dtos.ReservationDTO;
-import com.finalprogramacion.sistemaDeVuelos.models.entities.Airport;
 import com.finalprogramacion.sistemaDeVuelos.models.entities.Reservation;
 import com.finalprogramacion.sistemaDeVuelos.models.services.ReservationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,5 +68,9 @@ public class ReservationController {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
+    }
+    @GetMapping ("/{number}")
+    public ReservationDTO findByReservationNumber(Long reservationNumber){
+        return toReservationDTO(reservationService.getReservationById(reservationNumber));
     }
 }

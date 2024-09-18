@@ -1,5 +1,6 @@
 package com.finalprogramacion.sistemaDeVuelos.models.services;
 
+import com.finalprogramacion.sistemaDeVuelos.models.entities.Payment;
 import com.finalprogramacion.sistemaDeVuelos.models.entities.Reservation;
 import com.finalprogramacion.sistemaDeVuelos.models.entities.User;
 import com.finalprogramacion.sistemaDeVuelos.models.services.repositories.ReservationRepository;
@@ -55,5 +56,8 @@ public class ReservationService {
     public List<Reservation> getUserReservations(Long id){
         User user= userRepository.getReferenceById(id);
         return user.getReservations();
+    }
+    public Reservation getByReservationNumber(Long reservationNumber){
+        return reservationRepository.findByNumber(reservationNumber);
     }
 }

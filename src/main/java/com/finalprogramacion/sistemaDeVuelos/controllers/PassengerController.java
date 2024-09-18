@@ -16,7 +16,7 @@ import static com.finalprogramacion.sistemaDeVuelos.collectors.EntityAndDTOConve
 import static com.finalprogramacion.sistemaDeVuelos.collectors.EntityAndDTOConverter.toPassengerDTO;
 
 @RestController
-@RequestMapping("/api/passengers")
+@RequestMapping("/passengers")
 public class PassengerController {
 
     @Autowired

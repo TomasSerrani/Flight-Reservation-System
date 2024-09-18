@@ -28,7 +28,8 @@ public class Payment {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
-    @OneToOne(mappedBy = "payment")
+    @OneToOne
+    @JoinColumn(name = "reservation_id", referencedColumnName = "id")
     private Reservation reservation;
 
 

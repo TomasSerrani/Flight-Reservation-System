@@ -151,7 +151,7 @@ public class MainApp {
     }
 
     private JButton createBackButton() {
-        JButton backButton = new JButton("<-");
+        JButton backButton = new JButton("<- Back");
         backButton.addActionListener(e -> cardLayout.show(mainPanel, "Login"));
         return backButton;
     }
@@ -168,7 +168,7 @@ public class MainApp {
         gbc.gridy = 0;
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.WEST;
-        registerPanel.add(createBackButton(), gbc); // Añadir el botón "<-"
+        registerPanel.add(createBackButton(), gbc);
 
         // Etiqueta y campo de nombre
         gbc.gridy++;
@@ -565,7 +565,13 @@ public class MainApp {
             submitPaymentButton.addActionListener(paymentEvent -> {
                 int numberOfPayments = (Integer) numberOfPaymentsSpinner.getValue();
                 String selectedMethod = (String) paymentMethodComboBox.getSelectedItem();
-
+                java.sql.Date currentDate= new java.sql.Date(System.currentTimeMillis());
+                reservation.setDate(currentDate);
+                Long reservationNumber;
+                do {
+                    reservationNumber = reservation.generateReservationNumber();
+                }while (reservationController.findByReservationNumber(reservationNumber) != null);
+                reservation.setNumber(reservationNumber);
                 if ("Credit Card".equals(selectedMethod)) {
                     String cardNumber = cardNumberField.getText();
                     String expiryDate = cardExpiryField.getText();
@@ -580,10 +586,9 @@ public class MainApp {
                     Long paymentNumber;
                     do {
                         paymentNumber = paymentDTO.generatePaymentNumber();
-                    } while (paymentController.findByPaymentNumber(paymentNumber).getNumber() != null);
+                    } while (paymentController.findByPaymentNumber(paymentNumber) != null);
                     PaymentDTO finalPayment= new PaymentDTO(paymentNumber,selectedMethod,numberOfPayments,toUserDTO(currentUser));
-                    paymentController.createPayment(finalPayment);
-                    reservation.setPayment(dtoToPayment(paymentController.findByPaymentNumber(paymentNumber)));
+                    reservation.setPayment(dtoToPayment(finalPayment));
                 } else if ("Bank Transfer".equals(selectedMethod)) {
                     String bankAccount = bankAccountField.getText();
                     String bankName = bankNameField.getText();
@@ -599,17 +604,14 @@ public class MainApp {
                         paymentNumber = paymentDTO.generatePaymentNumber();
                     } while (paymentController.findByPaymentNumber(paymentNumber) != null);
                     PaymentDTO finalPayment= new PaymentDTO(paymentNumber,selectedMethod,numberOfPayments,toUserDTO(currentUser));
-                    paymentController.createPayment(finalPayment);
-                    reservation.setPayment(dtoToPayment(paymentController.findByPaymentNumber(paymentNumber)));
+                    reservation.setPayment(dtoToPayment(finalPayment));
                 }
 
                 try {
+                    reservation.setState("Booked");
                     reservationController.createReservation(toReservationDTO(reservation));
-                    Payment payment= dtoToPayment(paymentController.findById(reservation.getPayment().getId()));
-                    payment.setReservation(reservation);
-                    paymentController.update(payment.getId(), toPaymentDTO(payment));
                     JOptionPane.showMessageDialog(frame, "Flight booked and payment successful");
-                    cardLayout.show(mainPanel, "FlightSearch");
+                    cardLayout.show(mainPanel, "MainMenu");
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(frame, "Failed to process payment: " + ex.getMessage());
                 }
@@ -679,7 +681,15 @@ public class MainApp {
     private JPanel createUserPaymentsPanel() {
         JPanel userPaymentsPanel = new JPanel(new BorderLayout());
 
-        JList<Payment> paymentList = new JList<>();
+        DefaultListModel<PaymentDTO> paymentListModel = new DefaultListModel<>();
+        JList<PaymentDTO> paymentList = new JList<>(paymentListModel);
+        UserDetails userDetails = userDetailsController.findByEmail(userEmail);
+        if (userDetails != null) {
+            List<PaymentDTO> payments = paymentController.getUserPayments(userDetails.getId());
+            for (PaymentDTO payment : payments) {
+                paymentListModel.addElement(payment);
+            }
+        }
         JButton refreshButton = new JButton("Refresh");
 
         // Add back to main menu button
@@ -691,18 +701,27 @@ public class MainApp {
         buttonPanel.add(backToMainMenuButton);
 
         refreshButton.addActionListener(e -> {
-            // Implement payment refresh logic
-            UserDetails userDetails = userDetailsController.findByEmail(userEmail);
-            if (userDetails != null) {
-                List<PaymentDTO> payments = paymentController.getUserPayments(userDetails.getId());
-                paymentList.setListData(payments.toArray(new Payment[0]));
-            } else {
-                JOptionPane.showMessageDialog(frame, "Please log in first");
+            try {
+                if (userDetails != null) {
+                    List<PaymentDTO> payments = paymentController.getUserPayments(userDetails.getId());
+                    paymentListModel.clear(); // Limpiar lista existente
+                    for (PaymentDTO payment : payments) {
+                        paymentListModel.addElement(payment); // Agregar pagos a la lista
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(frame, "Please log in first");
+                }
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(frame, "Error loading payments: " + ex.getMessage());
+                ex.printStackTrace(); // Para el desarrollo, puedes registrar el error
             }
         });
 
         userPaymentsPanel.add(buttonPanel, BorderLayout.NORTH);
         userPaymentsPanel.add(new JScrollPane(paymentList), BorderLayout.CENTER);
+
+        // Cargar pagos inicialmente si es necesario
+        refreshButton.doClick(); // Opcional: para cargar pagos al iniciar
 
         return userPaymentsPanel;
     }

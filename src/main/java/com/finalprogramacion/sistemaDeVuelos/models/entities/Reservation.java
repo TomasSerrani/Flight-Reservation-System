@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.sql.Date;
+import java.util.Random;
 
 @NoArgsConstructor
 @Getter
@@ -30,21 +31,25 @@ public class Reservation {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
-    @OneToOne
-    @JoinColumn(name = "payment_id")
+    @OneToOne(mappedBy = "reservation", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Payment payment;
 
     @ManyToOne
     @JoinColumn(name = "flight_id", referencedColumnName = "id")
     private Flight flight;
 
-    public Reservation(Long id, Long number, Date date, String state, User user, Payment payment, Flight flight) {
-        this.id = id;
+    public Reservation( Long number, Date date, String state, User user, Payment payment, Flight flight) {
         this.number = number;
         this.date = date;
         this.state = state;
         this.user = user;
         this.payment = payment;
         this.flight = flight;
+    }
+    public Long generateReservationNumber() {
+        Random RANDOM = new Random();
+        long min = (long) Math.pow(10, 12 - 1);
+        long max = (long) Math.pow(10, 12) - 1;
+        return Math.abs(min + RANDOM.nextLong() % (max - min + 1));
     }
 }

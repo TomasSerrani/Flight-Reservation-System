@@ -2,9 +2,7 @@ package com.finalprogramacion.sistemaDeVuelos.controllers;
 
 import com.finalprogramacion.sistemaDeVuelos.collectors.EntityAndDTOConverter;
 import com.finalprogramacion.sistemaDeVuelos.models.dtos.PaymentDTO;
-import com.finalprogramacion.sistemaDeVuelos.models.dtos.UserDetailsDTO;
 import com.finalprogramacion.sistemaDeVuelos.models.entities.Payment;
-import com.finalprogramacion.sistemaDeVuelos.models.entities.UserDetails;
 import com.finalprogramacion.sistemaDeVuelos.models.services.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +14,7 @@ import java.util.stream.Collectors;
 import static com.finalprogramacion.sistemaDeVuelos.collectors.EntityAndDTOConverter.*;
 
 @RestController
-@RequestMapping("/api/payments")
+@RequestMapping("/payments")
 public class PaymentController {
 
     @Autowired
@@ -67,7 +65,7 @@ public class PaymentController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping
+    @GetMapping ("/{number}")
     public PaymentDTO findByPaymentNumber(Long paymentNumber){
         return toPaymentDTO(paymentService.getByPaymentNumber(paymentNumber));
     }
