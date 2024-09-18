@@ -57,6 +57,7 @@ public class MainApp {
 
         mainPanel.add(createLoginPanel(), "Login");
         mainPanel.add(createRegisterPanel(), "Register");
+        mainPanel.add(createMainMenuPanel(), "MainMenu"); // Add the new main menu panel
         mainPanel.add(createFlightSearchPanel(), "FlightSearch");
         mainPanel.add(createUserReservationsPanel(), "UserReservations");
         mainPanel.add(createUserPaymentsPanel(), "UserPayments");
@@ -87,8 +88,8 @@ public class MainApp {
             String password = new String(passwordField.getPassword());
             UserDetails userDetails = userDetailsController.login(email, password);
             if (userDetails != null) {
-                // Go to flight search panel
-                cardLayout.show(mainPanel, "FlightSearch");
+                // Go to main menu panel
+                cardLayout.show(mainPanel, "MainMenu");
                 this.userEmail = userDetails.getEmail();
             } else {
                 JOptionPane.showMessageDialog(frame, "Invalid email or password");
@@ -105,6 +106,48 @@ public class MainApp {
         loginPanel.add(registerButton);
 
         return loginPanel;
+    }
+
+    private JPanel createMainMenuPanel() {
+        JPanel mainMenuPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        JLabel welcomeLabel = new JLabel("Welcome to the Flight Reservation System");
+        welcomeLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        mainMenuPanel.add(welcomeLabel, gbc);
+
+        JButton searchFlightsButton = new JButton("Search Flights");
+        gbc.gridy = 1;
+        gbc.gridwidth = 1;
+        mainMenuPanel.add(searchFlightsButton, gbc);
+
+        JButton viewReservationsButton = new JButton("View My Reservations");
+        gbc.gridx = 1;
+        mainMenuPanel.add(viewReservationsButton, gbc);
+
+        JButton viewPaymentsButton = new JButton("View My Payments");
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        mainMenuPanel.add(viewPaymentsButton, gbc);
+
+        JButton logoutButton = new JButton("Logout");
+        gbc.gridx = 1;
+        mainMenuPanel.add(logoutButton, gbc);
+
+        searchFlightsButton.addActionListener(e -> cardLayout.show(mainPanel, "FlightSearch"));
+        viewReservationsButton.addActionListener(e -> cardLayout.show(mainPanel, "UserReservations"));
+        viewPaymentsButton.addActionListener(e -> cardLayout.show(mainPanel, "UserPayments"));
+        logoutButton.addActionListener(e -> {
+            this.userEmail = null;
+            cardLayout.show(mainPanel, "Login");
+        });
+
+        return mainMenuPanel;
     }
 
     private JButton createBackButton() {
@@ -235,10 +278,7 @@ public class MainApp {
     private JPanel createFlightSearchPanel() {
         JPanel flightSearchPanel = new JPanel(new BorderLayout());
 
-        // Añadir el botón "<-" en la parte superior
-        flightSearchPanel.add(createBackButton(), BorderLayout.NORTH);
-
-        // Panel for search fields
+        // Panel para los campos de búsqueda de vuelos (origen, destino, y botón buscar)
         JPanel searchPanel = new JPanel(new GridLayout(3, 2));
 
         JLabel originLabel = new JLabel("Origin:");
@@ -252,44 +292,45 @@ public class MainApp {
         searchPanel.add(originComboBox);
         searchPanel.add(destinationLabel);
         searchPanel.add(destinationComboBox);
-        searchPanel.add(new JLabel()); // Empty cell
+        searchPanel.add(new JLabel()); // Empty cell para mantener la estructura
         searchPanel.add(searchButton);
 
-        JList<FlightDTO> flightList = new JList<>();
+        // Agregar el panel de búsqueda al centro
         flightSearchPanel.add(searchPanel, BorderLayout.NORTH);
-        flightSearchPanel.add(new JScrollPane(flightList), BorderLayout.CENTER);
 
-        // Set preferred size for button
+        // Lista para mostrar los resultados de la búsqueda de vuelos
+        JList<FlightDTO> flightList = new JList<>();
+        JScrollPane flightScrollPane = new JScrollPane(flightList);
+        flightSearchPanel.add(flightScrollPane, BorderLayout.CENTER);
+
+        // Configurar el botón de búsqueda
         searchButton.setPreferredSize(new Dimension(100, 30));
 
         // Populate JComboBoxes with airport names
         populateFlightComboBoxes(originComboBox, destinationComboBox);
 
         searchButton.addActionListener(e -> {
-            // Get selected origin and destination
+            // Obtener el origen y destino seleccionados
             String origin = (String) originComboBox.getSelectedItem();
             String destination = (String) destinationComboBox.getSelectedItem();
 
             if (origin != null && destination != null) {
-                // Find flights that match both origin and destination
+                // Buscar vuelos que coincidan con el origen y destino seleccionados
                 List<FlightDTO> matchingFlights = flightController.searchFlightsByOriginAndDestination(origin, destination);
 
-                // Display the flights in the JList
+                // Mostrar los vuelos en la JList
                 flightList.setListData(matchingFlights.toArray(new FlightDTO[0]));
             } else {
-                // Handle case where either origin or destination is not selected
+                // Limpiar la lista si no se seleccionó origen o destino
                 flightList.setListData(new FlightDTO[0]); // Clear the list
             }
         });
-        // Agregar el botón "Seleccionar vuelo"
-        JButton selectFlightButton = new JButton("Select Flight");
-        flightSearchPanel.add(selectFlightButton, BorderLayout.SOUTH);
 
-        // Configurar el ListCellRenderer para mostrar datos adicionales
+        // Configurar el ListCellRenderer para mostrar detalles adicionales del vuelo
         flightList.setCellRenderer((list, value, index, isSelected, cellHasFocus) -> {
             JPanel panel = new JPanel(new GridLayout(1, 3));
-            JLabel numLabel = new JLabel("Fligh number: " + value.getFlightNum());
-            JLabel departureLabel = new JLabel("Departure: " + value.getDepartureDate() + value.getDepartureTime());
+            JLabel numLabel = new JLabel("Flight number: " + value.getFlightNum());
+            JLabel departureLabel = new JLabel("Departure: " + value.getDepartureDate() + " " + value.getDepartureTime());
             JLabel priceLabel = new JLabel("Price: " + value.getPrice());
 
             panel.add(departureLabel);
@@ -306,12 +347,26 @@ public class MainApp {
             return panel;
         });
 
+        // Panel inferior para botones (Main Menu y Select Flight)
+        JPanel bottomPanel = new JPanel(new BorderLayout());
+
+        // Botón "Main Menu" en la parte inferior izquierda
+        JButton mainMenuButton = new JButton("Main Menu");
+        mainMenuButton.addActionListener(e -> cardLayout.show(mainPanel, "MainMenu"));
+        bottomPanel.add(mainMenuButton, BorderLayout.WEST);
+
+        // Botón "Seleccionar vuelo" en la parte inferior derecha
+        JButton selectFlightButton = new JButton("Select Flight");
         selectFlightButton.addActionListener(e -> {
             FlightDTO selectedFlight = flightList.getSelectedValue();
             if (selectedFlight != null) {
                 showFlightDetails(selectedFlight);
             }
         });
+        bottomPanel.add(selectFlightButton, BorderLayout.EAST);
+
+        // Añadir el panel inferior al flightSearchPanel
+        flightSearchPanel.add(bottomPanel, BorderLayout.SOUTH);
 
         return flightSearchPanel;
     }
@@ -328,7 +383,6 @@ public class MainApp {
             destinationComboBox.addItem(destinationFlightInfo);
         }
     }
-
 
     private void showFlightDetails(FlightDTO flightDTO) {
         // Crear un nuevo panel de detalles de vuelo
@@ -383,6 +437,7 @@ public class MainApp {
         gbc.gridx = 1;
         flightDetailsPanel.add(priceValue, gbc);
 
+        // Botón de reserva
         JButton bookButton = new JButton("Book");
         bookButton.putClientProperty("flightDTO", flightDTO);
         gbc.gridx = 0;
@@ -391,6 +446,7 @@ public class MainApp {
         gbc.anchor = GridBagConstraints.CENTER;
         flightDetailsPanel.add(bookButton, gbc);
 
+        // Acción del botón de reserva (similar al código anterior)
         bookButton.addActionListener(e -> {
             FlightDTO selectedFlightDTO = (FlightDTO) bookButton.getClientProperty("flightDTO");
             UserDetails userDetails = userDetailsController.findByEmail(userEmail);
@@ -566,6 +622,15 @@ public class MainApp {
             // Añadir el panel de pago al panel principal
             mainPanel.add(paymentPanel, "Payment");
             cardLayout.show(mainPanel, "Payment");
+
+            // Aquí añadimos el botón de retroceso
+            JButton backButton = new JButton("<- Back");
+            paymentGbc.gridy = 5;
+            paymentGbc.gridwidth = 2;
+            paymentGbc.anchor = GridBagConstraints.CENTER;
+            paymentPanel.add(backButton, paymentGbc);
+
+            backButton.addActionListener(event -> cardLayout.show(mainPanel, "FlightDetails"));
         });
 
         JButton backButton = new JButton("<- Back");
@@ -580,37 +645,19 @@ public class MainApp {
         cardLayout.show(mainPanel, "FlightDetails");
     }
 
-
     private JPanel createUserReservationsPanel() {
-        JPanel userReservationsPanel = new JPanel();
-        userReservationsPanel.setLayout(new BorderLayout());
-
-        JList<Reservation> reservationList = new JList<>();
-        JButton refreshButton = new JButton("Refresh");
-
-        refreshButton.addActionListener(e -> {
-            // Implement reservation refresh logic
-            UserDetails userDetails = userDetailsController.findByEmail(userEmail);
-            if (userDetails != null) {
-                List<ReservationDTO> reservations = reservationController.getUserReservations(userDetails.getId());
-                reservationList.setListData(reservations.toArray(new Reservation[0]));
-            } else {
-                JOptionPane.showMessageDialog(frame, "Please log in first");
-            }
-        });
-
-        userReservationsPanel.add(refreshButton, BorderLayout.NORTH);
-        userReservationsPanel.add(new JScrollPane(reservationList), BorderLayout.CENTER);
-
-        return userReservationsPanel;
-    }
-
-    private JPanel createUserPaymentsPanel() {
-        JPanel userPaymentsPanel = new JPanel();
-        userPaymentsPanel.setLayout(new BorderLayout());
+        JPanel userPaymentsPanel = new JPanel(new BorderLayout());
 
         JList<Payment> paymentList = new JList<>();
         JButton refreshButton = new JButton("Refresh");
+
+        // Add back to main menu button
+        JButton backToMainMenuButton = new JButton("Main Menu");
+        backToMainMenuButton.addActionListener(e -> cardLayout.show(mainPanel, "MainMenu"));
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        buttonPanel.add(refreshButton);
+        buttonPanel.add(backToMainMenuButton);
 
         refreshButton.addActionListener(e -> {
             // Implement payment refresh logic
@@ -623,7 +670,38 @@ public class MainApp {
             }
         });
 
-        userPaymentsPanel.add(refreshButton, BorderLayout.NORTH);
+        userPaymentsPanel.add(buttonPanel, BorderLayout.NORTH);
+        userPaymentsPanel.add(new JScrollPane(paymentList), BorderLayout.CENTER);
+
+        return userPaymentsPanel;
+    }
+
+    private JPanel createUserPaymentsPanel() {
+        JPanel userPaymentsPanel = new JPanel(new BorderLayout());
+
+        JList<Payment> paymentList = new JList<>();
+        JButton refreshButton = new JButton("Refresh");
+
+        // Add back to main menu button
+        JButton backToMainMenuButton = new JButton("Main Menu");
+        backToMainMenuButton.addActionListener(e -> cardLayout.show(mainPanel, "MainMenu"));
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        buttonPanel.add(refreshButton);
+        buttonPanel.add(backToMainMenuButton);
+
+        refreshButton.addActionListener(e -> {
+            // Implement payment refresh logic
+            UserDetails userDetails = userDetailsController.findByEmail(userEmail);
+            if (userDetails != null) {
+                List<PaymentDTO> payments = paymentController.getUserPayments(userDetails.getId());
+                paymentList.setListData(payments.toArray(new Payment[0]));
+            } else {
+                JOptionPane.showMessageDialog(frame, "Please log in first");
+            }
+        });
+
+        userPaymentsPanel.add(buttonPanel, BorderLayout.NORTH);
         userPaymentsPanel.add(new JScrollPane(paymentList), BorderLayout.CENTER);
 
         return userPaymentsPanel;
