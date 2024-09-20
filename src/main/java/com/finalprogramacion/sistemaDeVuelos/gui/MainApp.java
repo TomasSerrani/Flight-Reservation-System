@@ -19,38 +19,38 @@ import static com.finalprogramacion.sistemaDeVuelos.collectors.EntityAndDTOConve
 
 @ComponentScan(basePackages = "com.finalprogramacion.sistemaDeVuelos")
 public class MainApp {
-        private ApplicationContext context;
+    private ApplicationContext context;
 
-        private JFrame frame;
-        private JPanel mainPanel;
-        private CardLayout cardLayout;
+    private JFrame frame;
+    private JPanel mainPanel;
+    private CardLayout cardLayout;
 
-        // Controllers
-        private UserController userController;
-        private FlightController flightController;
-        private ReservationController reservationController;
-        private PaymentController paymentController;
-        private UserDetailsController userDetailsController;
+    // Controllers
+    private UserController userController;
+    private FlightController flightController;
+    private ReservationController reservationController;
+    private PaymentController paymentController;
+    private UserDetailsController userDetailsController;
 
-        private String userEmail;
+    private String userEmail;
 
     public MainApp() {
         initializeContext();
         initializeControllers();
         setupUI();
     }
-        private void initializeContext () {
+    private void initializeContext() {
         context = new AnnotationConfigApplicationContext(AppConfig.class);
     }
 
-        private void initializeControllers () {
+    private void initializeControllers() {
         userController = context.getBean(UserController.class);
         flightController = context.getBean(FlightController.class);
         reservationController = context.getBean(ReservationController.class);
         paymentController = context.getBean(PaymentController.class);
         userDetailsController = context.getBean(UserDetailsController.class);
     }
-        private void setupUI () {
+    private void setupUI() {
         frame = new JFrame("Flight Reservation System");
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
@@ -71,7 +71,7 @@ public class MainApp {
         cardLayout.show(mainPanel, "Login");
     }
 
-        private JPanel createLoginPanel () {
+    private JPanel createLoginPanel() {
         JPanel loginPanel = new JPanel();
         loginPanel.setLayout(new GridLayout(3, 2));
 
@@ -108,13 +108,7 @@ public class MainApp {
         return loginPanel;
     }
 
-    private void createAndShowUserPaymentsPanel() {
-        JPanel userPaymentsPanel = createUserPaymentsPanel();
-        mainPanel.add(userPaymentsPanel, "UserPayments");
-        cardLayout.show(mainPanel, "UserPayments");
-    }
-
-        private JPanel createMainMenuPanel () {
+    private JPanel createMainMenuPanel() {
         JPanel mainMenuPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 10, 10, 10);
@@ -156,13 +150,13 @@ public class MainApp {
         return mainMenuPanel;
     }
 
-        private JButton createBackButton () {
+    private JButton createBackButton() {
         JButton backButton = new JButton("<- Back");
         backButton.addActionListener(e -> cardLayout.show(mainPanel, "Login"));
         return backButton;
     }
 
-        private JPanel createRegisterPanel () {
+    private JPanel createRegisterPanel() {
         JPanel registerPanel = new JPanel(new GridBagLayout());
 
         GridBagConstraints gbc = new GridBagConstraints();
@@ -265,10 +259,11 @@ public class MainApp {
             UserDTO createdUser = new UserDTO(name, dateOfBirth, createdUserDetails);
 
             try {
-                if (userDetailsController.findByEmail(createdUserDetails.getEmail()) == null) {
+                if (userDetailsController.findByEmail(createdUserDetails.getEmail()) == null){
                     userController.createUser(createdUser);
                     JOptionPane.showMessageDialog(frame, "Registration successful");
-                } else {
+                }
+                else {
                     JOptionPane.showMessageDialog(frame, "Registration failed: Email already used", "Error", JOptionPane.ERROR_MESSAGE);
                 }
                 cardLayout.show(mainPanel, "Login");
@@ -280,7 +275,7 @@ public class MainApp {
         return registerPanel;
     }
 
-        private JPanel createFlightSearchPanel () {
+    private JPanel createFlightSearchPanel() {
         JPanel flightSearchPanel = new JPanel(new BorderLayout());
 
         // Panel para los campos de búsqueda de vuelos (origen, destino, y botón buscar)
@@ -338,6 +333,7 @@ public class MainApp {
             JLabel departureLabel = new JLabel("Departure: " + value.getDepartureDate() + " " + value.getDepartureTime());
             JLabel priceLabel = new JLabel("Price: " + value.getPrice());
 
+            panel.add(numLabel);
             panel.add(departureLabel);
             panel.add(priceLabel);
 
@@ -376,8 +372,7 @@ public class MainApp {
         return flightSearchPanel;
     }
 
-        private void populateFlightComboBoxes
-        (JComboBox < String > originComboBox, JComboBox < String > destinationComboBox){
+    private void populateFlightComboBoxes(JComboBox<String> originComboBox, JComboBox<String> destinationComboBox) {
         // Obtener la lista de vuelos desde el servicio
         List<FlightDTO> flights = flightController.getAllFlights();
 
@@ -390,7 +385,7 @@ public class MainApp {
         }
     }
 
-        private void showFlightDetails (FlightDTO flightDTO){
+    private void showFlightDetails(FlightDTO flightDTO) {
         // Crear un nuevo panel de detalles de vuelo
         JPanel flightDetailsPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -567,16 +562,19 @@ public class MainApp {
             paymentGbc.gridwidth = 2;
             paymentGbc.anchor = GridBagConstraints.CENTER;
             paymentPanel.add(submitPaymentButton, paymentGbc);
+            Payment finalPayment= new Payment();
 
             submitPaymentButton.addActionListener(paymentEvent -> {
                 int numberOfPayments = (Integer) numberOfPaymentsSpinner.getValue();
                 String selectedMethod = (String) paymentMethodComboBox.getSelectedItem();
-                java.sql.Date currentDate = new java.sql.Date(System.currentTimeMillis());
+                java.sql.Date currentDate= new java.sql.Date(System.currentTimeMillis());
                 reservation.setDate(currentDate);
-                Long reservationNumber;
-
-                reservationNumber = reservation.generateReservationNumber();
-
+                Long reservationNumber= reservation.generateReservationNumber();
+                if(reservationController.findByReservationNumber(reservationNumber) != null){
+                    while (reservationController.findByReservationNumber(reservationNumber) != null) {
+                        reservationNumber = reservation.generateReservationNumber();
+                    }
+                }
                 reservation.setNumber(reservationNumber);
                 if ("Credit Card".equals(selectedMethod)) {
                     String cardNumber = cardNumberField.getText();
@@ -589,12 +587,18 @@ public class MainApp {
                     userDetails.updateCardDetails(expiryDate, cardNumber, cvv);
                     userDetailsController.update(userDetails.getId(), toUserDetailsDTO(userDetails));
                     PaymentDTO paymentDTO = new PaymentDTO();
-                    Long paymentNumber;
+                    Long paymentNumber= paymentDTO.generatePaymentNumber();
+                    if(paymentController.findByPaymentNumber(paymentNumber) != null){
+                        while (paymentController.findByPaymentNumber(paymentNumber) != null) {
+                            paymentNumber = paymentDTO.generatePaymentNumber();
+                        }
+                    }
+                    finalPayment.setNumber(paymentNumber);
+                    finalPayment.setUser(currentUser);
+                    finalPayment.setType(selectedMethod);
+                    finalPayment.setAmountOfPayments(numberOfPayments);
+                    reservation.setPayment(finalPayment);
 
-                    paymentNumber = paymentDTO.generatePaymentNumber();
-
-                    PaymentDTO finalPayment = new PaymentDTO(paymentNumber, selectedMethod, numberOfPayments, toUserDTO(currentUser));
-                    reservation.setPayment(dtoToPayment(finalPayment));
                 } else if ("Bank Transfer".equals(selectedMethod)) {
                     String bankAccount = bankAccountField.getText();
                     String bankName = bankNameField.getText();
@@ -605,18 +609,22 @@ public class MainApp {
                     userDetails.updateBankDetails(bankName, bankAccount);
                     userDetailsController.update(userDetails.getId(), toUserDetailsDTO(userDetails));
                     PaymentDTO paymentDTO = new PaymentDTO();
-                    Long paymentNumber;
-                    do {
-                        paymentNumber = paymentDTO.generatePaymentNumber();
-                    } while (paymentController.findByPaymentNumber(paymentNumber) != null);
-                    PaymentDTO finalPayment = new PaymentDTO(paymentNumber, selectedMethod, numberOfPayments, toUserDTO(currentUser));
-                    reservation.setPayment(dtoToPayment(finalPayment));
+                    Long paymentNumber= paymentDTO.generatePaymentNumber();
+                    if(paymentController.findByPaymentNumber(paymentNumber) != null){
+                        while (paymentController.findByPaymentNumber(paymentNumber) != null) {
+                            paymentNumber = paymentDTO.generatePaymentNumber();
+                        }
+                    }
+                    finalPayment.setNumber(paymentNumber);
+                    finalPayment.setUser(currentUser);
+                    finalPayment.setType(selectedMethod);
+                    finalPayment.setAmountOfPayments(numberOfPayments);
+                    reservation.setPayment(finalPayment);
                 }
 
                 try {
                     reservation.setState("Booked");
                     reservationController.createReservation(toReservationDTO(reservation));
-                    JOptionPane.showMessageDialog(frame, "Flight booked and payment successful");
                     cardLayout.show(mainPanel, "MainMenu");
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(frame, "Failed to process payment: " + ex.getMessage());
@@ -653,10 +661,10 @@ public class MainApp {
         cardLayout.show(mainPanel, "FlightDetails");
     }
 
-        private JPanel createUserReservationsPanel () {
-        JPanel userReservationsPanel = new JPanel(new BorderLayout());
+    private JPanel createUserReservationsPanel() {
+        JPanel userPaymentsPanel = new JPanel(new BorderLayout());
 
-        JList<Reservation> reservationList = new JList<>();
+        JList<Payment> paymentList = new JList<>();
         JButton refreshButton = new JButton("Refresh");
 
         // Add back to main menu button
@@ -671,21 +679,20 @@ public class MainApp {
             // Implement payment refresh logic
             UserDetails userDetails = userDetailsController.findByEmail(userEmail);
             if (userDetails != null) {
-                List<ReservationDTO> reservations = reservationController.getUserReservations(userDetails.getId());
-                reservationList.setListData(reservations.toArray(new Reservation[0]));
+                List<PaymentDTO> payments = paymentController.getUserPayments(userDetails.getId());
+                paymentList.setListData(payments.toArray(new Payment[0]));
             } else {
                 JOptionPane.showMessageDialog(frame, "Please log in first");
             }
         });
 
-        userReservationsPanel.add(buttonPanel, BorderLayout.NORTH);
-        userReservationsPanel.add(new JScrollPane(reservationList), BorderLayout.CENTER);
+        userPaymentsPanel.add(buttonPanel, BorderLayout.NORTH);
+        userPaymentsPanel.add(new JScrollPane(paymentList), BorderLayout.CENTER);
 
-
-        return userReservationsPanel;
+        return userPaymentsPanel;
     }
 
-        private JPanel createUserPaymentsPanel () {
+    private JPanel createUserPaymentsPanel() {
         JPanel userPaymentsPanel = new JPanel(new BorderLayout());
 
         DefaultListModel<PaymentDTO> paymentListModel = new DefaultListModel<>();
@@ -709,9 +716,10 @@ public class MainApp {
 
         refreshButton.addActionListener(e -> {
             try {
-                if (userDetails != null) {
-                    List<PaymentDTO> payments = paymentController.getUserPayments(userDetails.getId());
-                    paymentListModel.clear(); // Limpiar lista existente
+                UserDetails userDetails1 = userDetailsController.findByEmail(userEmail);
+                if (userDetails1 != null) {
+                    List<PaymentDTO> payments = paymentController.getUserPayments(userDetails1.getId());
+                    paymentListModel.clear(); // Limpiar listomasta existente
                     for (PaymentDTO payment : payments) {
                         paymentListModel.addElement(payment); // Agregar pagos a la lista
                     }
@@ -724,15 +732,37 @@ public class MainApp {
             }
         });
 
+        paymentList.setCellRenderer((list, value, index, isSelected, cellHasFocus) -> {
+                    Reservation reservation=  dtoToReservation(reservationController.getReservationById(value.getId()));
+                    JPanel panel = new JPanel(new GridLayout(1, 4));
+                    JLabel numLabel = new JLabel("Payment number: " + value.getNumber());
+                    JLabel typeLabel = new JLabel("Type: " + value.getType());
+                    JLabel amountLabel = new JLabel("Amount of payments : " + value.getAmountOfPayments());
+                    JLabel reservationLabel = new JLabel("Reservation number: " + reservation.getNumber());
+
+                    panel.add(numLabel);
+                    panel.add(typeLabel);
+                    panel.add(amountLabel);
+                    panel.add(reservationLabel);
+
+                    if (isSelected) {
+                        panel.setBackground(list.getSelectionBackground());
+                        panel.setForeground(list.getSelectionForeground());
+                    } else {
+                        panel.setBackground(list.getBackground());
+                        panel.setForeground(list.getForeground());
+                    }
+
+                    return panel;
+                });
         userPaymentsPanel.add(buttonPanel, BorderLayout.NORTH);
         userPaymentsPanel.add(new JScrollPane(paymentList), BorderLayout.CENTER);
 
-        refreshButton.doClick();
 
         return userPaymentsPanel;
     }
 
-        public static void main (String[]args){
+    public static void main(String[] args) {
         SwingUtilities.invokeLater(MainApp::new);
     }
 }

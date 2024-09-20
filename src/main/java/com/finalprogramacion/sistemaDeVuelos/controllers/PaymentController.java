@@ -66,7 +66,7 @@ public class PaymentController {
     }
 
     @GetMapping ("/{number}")
-    public PaymentDTO findByPaymentNumber(Long paymentNumber){
-        return toPaymentDTO(paymentService.getByPaymentNumber(paymentNumber));
+    public Payment findByPaymentNumber(Long paymentNumber){
+        return paymentService.getByPaymentNumber(paymentNumber);
     }
 }

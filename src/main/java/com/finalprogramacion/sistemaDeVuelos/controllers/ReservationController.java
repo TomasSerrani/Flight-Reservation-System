@@ -29,12 +29,9 @@ public class ReservationController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ReservationDTO> getReservationById(@PathVariable Long id) {
+    public ReservationDTO getReservationById(@PathVariable Long id) {
         ReservationDTO reservation = toReservationDTO(reservationService.getReservationById(id));
-        if (reservationService.getReservationById(id) != null) {
-            return ResponseEntity.ok(reservation);
-        }
-            return ResponseEntity.notFound().build();
+        return reservation;
     }
 
     @GetMapping("/user-reservations")
@@ -70,7 +67,7 @@ public class ReservationController {
         return ResponseEntity.notFound().build();
     }
     @GetMapping ("/{number}")
-    public ReservationDTO findByReservationNumber(Long reservationNumber){
-        return toReservationDTO(reservationService.getReservationById(reservationNumber));
+    public Reservation findByReservationNumber(Long reservationNumber){
+        return reservationService.getByReservationNumber(reservationNumber);
     }
 }

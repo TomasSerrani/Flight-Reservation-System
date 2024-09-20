@@ -32,7 +32,12 @@ public class Payment {
     @JoinColumn(name = "reservation_id", referencedColumnName = "id")
     private Reservation reservation;
 
+    public Payment(Payment payment) {
+    }
 
+    public void updateReservation(Reservation reservation){
+        this.reservation= reservation;
+    }
 
     public Payment(Long id, Long number, String type, int amountOfPayments, User user, Reservation reservation) {
         this.id = id;
