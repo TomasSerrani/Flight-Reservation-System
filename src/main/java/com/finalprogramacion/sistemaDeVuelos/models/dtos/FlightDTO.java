@@ -7,6 +7,7 @@ import lombok.Setter;
 import java.sql.Time;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.ArrayList;
 
 @Getter
 @Setter
@@ -26,6 +27,22 @@ public class FlightDTO {
     private AirportDTO destination;
     private List<AirportDTO> stopOvers;
     private List<PassengerDTO> passengers;
+
+    private List<SeatDTO> seats;
+
+    private List<String> reservedSeats = new ArrayList<>(); // Para almacenar los números de asiento reservados
+
+    // Método para obtener los asientos reservados
+    public List<String> getReservedSeats() {
+        return reservedSeats;
+    }
+
+    // Método para reservar un asiento
+    public void reserveSeat(String seatNumber) {
+        if (!reservedSeats.contains(seatNumber)) {
+            reservedSeats.add(seatNumber);
+        }
+    }
 
     @Override
     public String toString() {

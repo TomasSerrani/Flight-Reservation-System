@@ -10,6 +10,8 @@ import org.springframework.context.annotation.ComponentScan;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -761,7 +763,77 @@ public class MainApp {
 
         return userPaymentsPanel;
     }
+    public class SeatSelectionPanel extends JPanel {
+        private JButton[][] seatButtons;
+        private String selectedSeat;
+        private FlightDTO flightDTO;
 
+        public SeatSelectionPanel(FlightDTO flightDTO) {
+            this.flightDTO = flightDTO;
+            initializeUI();
+        }
+
+        private void initializeUI() {
+            setLayout(new BorderLayout());
+
+            // Crear el panel de asientos
+            JPanel seatGridPanel = new JPanel(new GridLayout(6, 6, 10, 10)); // Por ejemplo, 6 filas y 6 columnas
+            seatButtons = new JButton[6][6];
+
+            List<String> reservedSeats = flightDTO.getReservedSeats(); // Obtener los asientos reservados
+
+            for (int row = 0; row < 6; row++) {
+                for (int col = 0; col < 6; col++) {
+                    String seatLabel = (char) ('A' + row) + Integer.toString(col + 1); // Ejemplo: "A1", "B2"
+                    seatButtons[row][col] = new JButton(seatLabel);
+
+                    // Comprobar si el asiento está reservado
+                    if (reservedSeats.contains(seatLabel)) {
+                        seatButtons[row][col].setEnabled(false);
+                        seatButtons[row][col].setBackground(Color.RED); // Rojo para asientos ocupados
+                    } else {
+                        seatButtons[row][col].setBackground(Color.GREEN); // Verde para asientos disponibles
+                        seatButtons[row][col].addActionListener(new SeatSelectionListener(seatLabel));
+                    }
+
+                    seatGridPanel.add(seatButtons[row][col]);
+                }
+            }
+
+            // Botón para confirmar selección
+            JButton confirmButton = new JButton("Confirmar Selección");
+            confirmButton.addActionListener(e -> confirmSeatSelection());
+
+            // Añadir el panel de asientos y el botón de confirmación
+            add(seatGridPanel, BorderLayout.CENTER);
+            add(confirmButton, BorderLayout.SOUTH);
+        }
+
+        private class SeatSelectionListener implements ActionListener {
+            private String seatLabel;
+
+            public SeatSelectionListener(String seatLabel) {
+                this.seatLabel = seatLabel;
+            }
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                selectedSeat = seatLabel; // Guardar el asiento seleccionado
+                JOptionPane.showMessageDialog(SeatSelectionPanel.this, "Has seleccionado el asiento: " + selectedSeat);
+            }
+        }
+
+        private void confirmSeatSelection() {
+            if (selectedSeat != null) {
+                // Reservar el asiento y proceder al siguiente paso (por ejemplo, proceso de pago)
+                flightDTO.reserveSeat(selectedSeat);
+                JOptionPane.showMessageDialog(this, "Asiento " + selectedSeat + " reservado. Proceder al pago.");
+                // Aquí se puede continuar al panel de pago, según la lógica de tu aplicación
+            } else {
+                JOptionPane.showMessageDialog(this, "Por favor selecciona un asiento.");
+            }
+        }
+    }
     public static void main(String[] args) {
         SwingUtilities.invokeLater(MainApp::new);
     }
