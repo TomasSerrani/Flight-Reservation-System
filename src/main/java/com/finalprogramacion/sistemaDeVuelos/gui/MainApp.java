@@ -4,6 +4,7 @@ import com.finalprogramacion.sistemaDeVuelos.AppConfig;
 import com.finalprogramacion.sistemaDeVuelos.controllers.*;
 import com.finalprogramacion.sistemaDeVuelos.models.dtos.*;
 import com.finalprogramacion.sistemaDeVuelos.models.entities.*;
+import com.finalprogramacion.sistemaDeVuelos.models.services.repositories.ReservationRepository;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
@@ -14,6 +15,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Date;
 import java.util.List;
 
@@ -427,9 +430,13 @@ public class MainApp {
         gbc.gridy = 3;
         flightDetailsPanel.add(departureLabel, gbc);
 
-        JLabel departureValue = new JLabel(flightDTO.getDepartureDate().toString() + " " + flightDTO.getDepartureTime().toString());
+        String departureDate = flightDTO.getDepartureDate() != null ? flightDTO.getDepartureDate().toString() : "Fecha no disponible";
+        String departureTime = flightDTO.getDepartureTime() != null ? flightDTO.getDepartureTime().toString() : "Hora no disponible";
+
+        JLabel departureValue = new JLabel(departureDate + " " + departureTime);
         gbc.gridx = 1;
         flightDetailsPanel.add(departureValue, gbc);
+
 
         JLabel priceLabel = new JLabel("Price:");
         gbc.gridx = 0;
@@ -664,35 +671,116 @@ public class MainApp {
     }
 
     private JPanel createUserReservationsPanel() {
-        JPanel userPaymentsPanel = new JPanel(new BorderLayout());
+        JPanel userReservationsPanel = new JPanel(new BorderLayout());
 
-        JList<Payment> paymentList = new JList<>();
+        DefaultListModel<ReservationDTO> reservationListModel = new DefaultListModel<>();
+        JList<ReservationDTO> reservationList = new JList<>(reservationListModel); // Cambiado a PaymentDTO
         JButton refreshButton = new JButton("Refresh");
+        JButton modifyButton = new JButton("Modify Reservation");
+        JButton deleteButton = new JButton("Delete Reservation");
 
-        // Add back to main menu button
+        // Botón para regresar al menú principal
         JButton backToMainMenuButton = new JButton("Main Menu");
         backToMainMenuButton.addActionListener(e -> cardLayout.show(mainPanel, "MainMenu"));
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         buttonPanel.add(refreshButton);
+        buttonPanel.add(modifyButton);
+        buttonPanel.add(deleteButton);
         buttonPanel.add(backToMainMenuButton);
 
         refreshButton.addActionListener(e -> {
-            // Implement payment refresh logic
+            // Implementar la lógica de actualización de pagos
             UserDetails userDetails = userDetailsController.findByEmail(userEmail);
             if (userDetails != null) {
-                List<PaymentDTO> payments = paymentController.getUserPayments(userDetails.getId());
-                paymentList.setListData(payments.toArray(new Payment[0]));
+                List<ReservationDTO> reservations = reservationController.getUserReservations(userDetails.getId());
+                reservationList.setListData(reservations.toArray(new ReservationDTO[0])); // Cambiado a PaymentDTO
             } else {
                 JOptionPane.showMessageDialog(frame, "Please log in first");
             }
         });
 
-        userPaymentsPanel.add(buttonPanel, BorderLayout.NORTH);
-        userPaymentsPanel.add(new JScrollPane(paymentList), BorderLayout.CENTER);
+        modifyButton.addActionListener(e -> {
+            // Obtener el pago seleccionado
+            ReservationDTO selectedReservation = reservationList.getSelectedValue(); // Cambiado a PaymentDTO
+            if (selectedReservation != null) {
+                // Abrir un diálogo o nueva ventana para modificar la reserva
+                Reservation reservation = reservationController.findByReservationNumber(selectedReservation.getId());
+                if (reservation != null) {
+                    // Llamar al método para mostrar la UI de modificación
+                    showModifyReservationDialog(reservation);
+                } else {
+                    JOptionPane.showMessageDialog(frame, "No reservation found for this payment");
+                }
+            } else {
+                JOptionPane.showMessageDialog(frame, "Please select a reservation to modify");
+            }
+        });
 
-        return userPaymentsPanel;
+        deleteButton.addActionListener(e -> {
+            // Obtener el pago seleccionado
+            ReservationDTO selectedreservation = reservationList.getSelectedValue(); // Cambiado a PaymentDTO
+            if (selectedreservation != null) {
+                int confirm = JOptionPane.showConfirmDialog(frame, "Are you sure you want to delete this reservation?", "Confirm Delete", JOptionPane.YES_NO_OPTION);
+                if (confirm == JOptionPane.YES_OPTION) {
+                    // Eliminar reserva
+                    reservationController.deleteReservation(selectedreservation.getId()); // Cambiado a deleteReservationById
+                    JOptionPane.showMessageDialog(frame, "Reservation deleted successfully");
+                    refreshButton.doClick(); // Actualizar la lista después de eliminar
+                }
+            } else {
+                JOptionPane.showMessageDialog(frame, "Please select a reservation to delete");
+            }
+        });
+
+        userReservationsPanel.add(buttonPanel, BorderLayout.NORTH);
+        userReservationsPanel.add(new JScrollPane(reservationList), BorderLayout.CENTER);
+
+        return userReservationsPanel;
     }
+
+    private void showModifyReservationDialog(Reservation reservation) {
+        JDialog modifyDialog = new JDialog(frame, "Modify Reservation", true);
+        modifyDialog.setLayout(new BorderLayout());
+
+        // Campo de texto para la fecha de la reserva
+        JTextField dateField = new JTextField(reservation.getDate().toString());
+
+        // Botón para guardar los cambios
+        JButton saveButton = new JButton("Save");
+        saveButton.addActionListener(e -> {
+            try {
+                // Obtener la nueva fecha del campo de texto
+                java.sql.Date newDate = java.sql.Date.valueOf(LocalDate.parse(dateField.getText()));
+
+                // Actualizar los detalles de la reserva con los nuevos valores
+                reservation.setDate(newDate);
+
+                // Llamar al controlador para actualizar la reserva, pasando el ID y los nuevos detalles
+
+                // Mostrar un mensaje de éxito y cerrar el diálogo
+                JOptionPane.showMessageDialog(modifyDialog, "Reservation updated successfully");
+                modifyDialog.dispose();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(modifyDialog, "Error updating reservation: " + ex.getMessage());
+            }
+        });
+
+        // Crear el formulario para los campos de la reserva
+        JPanel formPanel = new JPanel(new GridLayout(2, 2));
+        formPanel.add(new JLabel("Date:"));
+        formPanel.add(dateField);
+
+        // Agregar el formulario y el botón "Save" al diálogo
+        modifyDialog.add(formPanel, BorderLayout.CENTER);
+        modifyDialog.add(saveButton, BorderLayout.SOUTH);
+
+        // Configurar el tamaño y la posición del diálogo
+        modifyDialog.setSize(300, 200);
+        modifyDialog.setLocationRelativeTo(frame);
+        modifyDialog.setVisible(true);
+    }
+
 
     private JPanel createUserPaymentsPanel() {
         JPanel userPaymentsPanel = new JPanel(new BorderLayout());

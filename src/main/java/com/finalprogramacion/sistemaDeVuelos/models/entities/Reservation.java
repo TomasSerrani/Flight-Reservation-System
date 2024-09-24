@@ -14,6 +14,7 @@ import java.util.Random;
 @Entity
 @Table(name = "reservations")
 public class Reservation {
+    public Long getId;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

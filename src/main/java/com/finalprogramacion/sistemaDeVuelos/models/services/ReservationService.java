@@ -5,10 +5,14 @@ import com.finalprogramacion.sistemaDeVuelos.models.entities.Reservation;
 import com.finalprogramacion.sistemaDeVuelos.models.entities.User;
 import com.finalprogramacion.sistemaDeVuelos.models.services.repositories.ReservationRepository;
 import com.finalprogramacion.sistemaDeVuelos.models.services.repositories.UserRepository;
+import jakarta.transaction.Transactional;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -42,7 +46,7 @@ public class ReservationService {
             existingReservation.setState(reservationDetails.getState());
             return reservationRepository.save(existingReservation);
         }
-            return null;
+        return reservationDetails;
     }
 
     public boolean deleteReservation(Long id) {
@@ -52,11 +56,21 @@ public class ReservationService {
         }
             return false;
     }
-
-    public List<Reservation> getUserReservations(Long id){
-        User user= userRepository.getReferenceById(id);
-        return user.getReservations();
+    public void deleteByPaymentId(Long paymentId) {
+        Reservation reservation = reservationRepository.findById(paymentId)
+                .orElseThrow(() -> new NoSuchElementException("No reservation found for payment ID " + paymentId));
+        reservationRepository.delete(reservation);
     }
+
+    @Transactional // Asegúrate de tener esta anotación
+    public List<Reservation> getUserReservations(Long id) {
+        User user = userRepository.findById(id).orElse(null); // Cambia a findById
+        if (user != null) {
+            return user.getReservations(); // Esto ahora debería funcionar sin problemas
+        }
+        return Collections.emptyList(); // Manejar caso de usuario no encontrado
+    }
+
     public Reservation getByReservationNumber(Long reservationNumber){
         return reservationRepository.findByNumber(reservationNumber);
     }
