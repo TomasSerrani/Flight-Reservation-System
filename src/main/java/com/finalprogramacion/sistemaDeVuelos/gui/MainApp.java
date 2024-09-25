@@ -245,8 +245,18 @@ public class MainApp {
         backButton.setBackground(new Color(70, 130, 180));
         backButton.setForeground(Color.WHITE);
         backButton.setFocusPainted(false);
-            backButton.addActionListener(e -> cardLayout.show(mainPanel, "Login"));
+            backButton.addActionListener(e -> cardLayout.show(mainPanel, "MainMenu"));
             return backButton;
+    }
+
+    private JButton createBackToRegisterButton() {
+        JButton backButton = new JButton("<-Back");
+        backButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        backButton.setBackground(new Color(70, 130, 180));
+        backButton.setForeground(Color.WHITE);
+        backButton.setFocusPainted(false);
+        backButton.addActionListener(e -> cardLayout.show(mainPanel, "MainMenu"));
+        return backButton;
     }
 
     private JPanel createRegisterPanel() {
@@ -261,7 +271,7 @@ public class MainApp {
         gbc.gridy = 0;
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.WEST;
-        JButton backButton = createBackButton();
+        JButton backButton = createBackToRegisterButton();
         registerPanel.add(backButton, gbc);
 
         // Name label and field
@@ -1059,15 +1069,8 @@ public class MainApp {
         deleteButton.setFocusPainted(false);
         gbc.gridx = 4;
         buttonPanel.add(deleteButton, gbc);
-
-        // Back to main menu button
-        JButton backToMainMenuButton = new JButton("Main Menu");
-        backToMainMenuButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        backToMainMenuButton.setBackground(new Color(70, 130, 180));
-        backToMainMenuButton.setForeground(Color.WHITE);
-        backToMainMenuButton.setFocusPainted(false);
-        gbc.gridx = 5;
-        buttonPanel.add(backToMainMenuButton, gbc);
+        gbc.gridx= 5;
+        buttonPanel.add(createBackButton(), gbc);
 
         // Add button panel to the top of the userReservationsPanel
         userReservationsPanel.add(buttonPanel, BorderLayout.NORTH);
@@ -1320,13 +1323,8 @@ public class MainApp {
         buttonPanel.add(refreshButton, gbc);
 
         // Main Menu button
-        JButton backToMainMenuButton = new JButton("Main Menu");
-        backToMainMenuButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        backToMainMenuButton.setBackground(new Color(70, 130, 180));
-        backToMainMenuButton.setForeground(Color.WHITE);
-        backToMainMenuButton.setFocusPainted(false);
-        gbc.gridx = 1;
-        buttonPanel.add(backToMainMenuButton, gbc);
+        gbc.gridx= 1;
+        buttonPanel.add(createBackButton(), gbc);
 
         // Add button panel to the top of the userPaymentsPanel
         userPaymentsPanel.add(buttonPanel, BorderLayout.NORTH);
@@ -1345,9 +1343,6 @@ public class MainApp {
                 ex.printStackTrace();
             }
         });
-
-        // Return to Main Menu action
-        backToMainMenuButton.addActionListener(e -> cardLayout.show(mainPanel, "MainMenu"));
 
         // Custom renderer for payment list
         paymentList.setCellRenderer((list, value, index, isSelected, cellHasFocus) -> {
