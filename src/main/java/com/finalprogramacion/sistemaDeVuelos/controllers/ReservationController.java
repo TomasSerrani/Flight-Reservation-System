@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -77,5 +78,6 @@ public class ReservationController {
         return reservationService.getByReservationNumber(reservationNumber);
     }
 
-
+    public void updateReservation(Long number, Date newDate, int newPassengerCount) {
+    }
 }

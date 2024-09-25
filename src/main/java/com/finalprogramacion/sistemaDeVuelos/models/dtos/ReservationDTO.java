@@ -1,4 +1,5 @@
 package com.finalprogramacion.sistemaDeVuelos.models.dtos;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,14 +17,16 @@ public class ReservationDTO {
     private UserDTO user;
     private PaymentDTO payment;
     private FlightDTO flight;
+    private int passengerCount;
 
-    public ReservationDTO(Long number, Date date, String state, UserDTO user, PaymentDTO payment, FlightDTO flight) {
+    public ReservationDTO(Long number, Date date, String state, UserDTO user, PaymentDTO payment, FlightDTO flight, int passengerCount) {
         this.number = number;
         this.date = date;
         this.state = state;
         this.user = user;
         this.payment = payment;
         this.flight = flight;
+        this.passengerCount = passengerCount;
     }
 
     public void setPaymentID(Long id) {

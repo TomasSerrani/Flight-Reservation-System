@@ -14,8 +14,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
+import java.util.*;
 import java.util.List;
 
 import static com.finalprogramacion.sistemaDeVuelos.collectors.EntityAndDTOConverter.*;
@@ -161,7 +160,6 @@ public class MainApp {
 
     private JPanel createRegisterPanel() {
         JPanel registerPanel = new JPanel(new GridBagLayout());
-
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -184,53 +182,49 @@ public class MainApp {
         registerPanel.add(nameField, gbc);
 
         // Etiqueta y campo de fecha de nacimiento
+        gbc.gridx = 0; // Vuelve a la columna 0
+        gbc.gridy++; // Incrementa la fila
         JLabel dateOfBirthLabel = new JLabel("Date of birth: DD/MM/YYYY");
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        gbc.weightx = 0.2;
         registerPanel.add(dateOfBirthLabel, gbc);
+
         JTextField dateOfBirthField = new JTextField(15);
         gbc.gridx = 1;
-        gbc.weightx = 0.8;
         registerPanel.add(dateOfBirthField, gbc);
 
         // Etiqueta y campo de correo electrónico
+        gbc.gridx = 0; // Vuelve a la columna 0
+        gbc.gridy++; // Incrementa la fila
         JLabel emailLabel = new JLabel("Email:");
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        gbc.weightx = 0.2;
         registerPanel.add(emailLabel, gbc);
+
         JTextField emailField = new JTextField(15);
         gbc.gridx = 1;
-        gbc.weightx = 0.8;
         registerPanel.add(emailField, gbc);
 
         // Etiqueta y campo de contraseña
+        gbc.gridx = 0; // Vuelve a la columna 0
+        gbc.gridy++; // Incrementa la fila
         JLabel passwordLabel = new JLabel("Password:");
-        gbc.gridx = 0;
-        gbc.gridy = 3;
-        gbc.weightx = 0.2;
         registerPanel.add(passwordLabel, gbc);
+
         JPasswordField passwordField = new JPasswordField(15);
         gbc.gridx = 1;
-        gbc.weightx = 0.8;
         registerPanel.add(passwordField, gbc);
 
         // Etiqueta y campo de teléfono
+        gbc.gridx = 0; // Vuelve a la columna 0
+        gbc.gridy++; // Incrementa la fila
         JLabel phoneLabel = new JLabel("Phone:");
-        gbc.gridx = 0;
-        gbc.gridy = 4;
-        gbc.weightx = 0.2;
         registerPanel.add(phoneLabel, gbc);
+
         JTextField phoneField = new JTextField(15);
         gbc.gridx = 1;
-        gbc.weightx = 0.8;
         registerPanel.add(phoneField, gbc);
 
         // Botón de registro
         JButton registerButton = new JButton("Register");
-        gbc.gridx = 0;
-        gbc.gridy = 5;
+        gbc.gridx = 0; // Vuelve a la columna 0
+        gbc.gridy++; // Incrementa la fila
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.fill = GridBagConstraints.NONE;
@@ -277,6 +271,7 @@ public class MainApp {
 
         return registerPanel;
     }
+
 
     private JPanel createFlightSearchPanel() {
         JPanel flightSearchPanel = new JPanel(new BorderLayout());
@@ -763,31 +758,69 @@ public class MainApp {
         try {
             UserDetails userDetails = userDetailsController.findByEmail(userEmail);
             if (userDetails != null) {
-                loadUserReservations(userDetails.getId(), reservationListModel);
+                loadUserReservations(userDetails.getId(), reservationListModel, "Date (Closest)", true);
             }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(frame, "Error loading reservations: " + ex.getMessage());
             ex.printStackTrace();
         }
 
+        // Add sorting options
+        JLabel sortByLabel = new JLabel("Sort by:");
+        String[] sortingOptions = {"Date (Closest)", "Date (Furthest)", "Passengers (Most)", "Passengers (Least)"};
+        JComboBox<String> sortingComboBox = new JComboBox<>(sortingOptions);
+
         // Add refresh and main menu buttons
         JButton refreshButton = new JButton("Refresh");
         JButton backToMainMenuButton = new JButton("Main Menu");
         backToMainMenuButton.addActionListener(e -> cardLayout.show(mainPanel, "MainMenu"));
 
+        // New buttons for modify and delete
+        JButton modifyButton = new JButton("Modify");
+        JButton deleteButton = new JButton("Delete");
+
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        buttonPanel.add(sortByLabel);
+        buttonPanel.add(sortingComboBox);
         buttonPanel.add(refreshButton);
+        buttonPanel.add(modifyButton);
+        buttonPanel.add(deleteButton);
         buttonPanel.add(backToMainMenuButton);
 
+        // Refresh button action
         refreshButton.addActionListener(e -> {
             try {
                 UserDetails userDetails1 = userDetailsController.findByEmail(userEmail);
                 if (userDetails1 != null) {
-                    loadUserReservations(userDetails1.getId(), reservationListModel);
+                    // Load reservations with selected sorting option
+                    String selectedSortOption = (String) sortingComboBox.getSelectedItem();
+                    boolean ascending = !selectedSortOption.equals("Date (Furthest)");  // Ascendente para "Date (Closest)"
+                    loadUserReservations(userDetails1.getId(), reservationListModel, selectedSortOption, ascending);
                 }
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(frame, "Error loading reservations: " + ex.getMessage());
                 ex.printStackTrace();
+            }
+        });
+
+        // Modify button action
+        modifyButton.addActionListener(e -> {
+            ReservationDTO selectedReservation = reservationList.getSelectedValue();
+            if (selectedReservation != null) {
+                modifyReservation(selectedReservation);
+            } else {
+                JOptionPane.showMessageDialog(frame, "Please select a reservation to modify.");
+            }
+        });
+
+        // Delete button action
+        deleteButton.addActionListener(e -> {
+            ReservationDTO selectedReservation = reservationList.getSelectedValue();
+            if (selectedReservation != null) {
+                deleteReservation(selectedReservation);
+                reservationListModel.removeElement(selectedReservation);
+            } else {
+                JOptionPane.showMessageDialog(frame, "Please select a reservation to delete.");
             }
         });
 
@@ -817,6 +850,14 @@ public class MainApp {
             if (value.getFlight() != null) {
                 gbc.gridx = 1;
                 reservationPanel.add(new JLabel(value.getFlight().getFlightNum()), gbc);
+
+                // Display Passenger Count
+                gbc.gridx = 0;
+                gbc.gridy = 2;
+                reservationPanel.add(new JLabel("Passenger Count:"), gbc);
+
+                gbc.gridx = 1;
+                reservationPanel.add(new JLabel(String.valueOf(value.getFlight().getPassengerCount())), gbc); // Asegúrate de que FlightDTO tenga este método
             } else {
                 gbc.gridx = 1;
                 reservationPanel.add(new JLabel("N/A"), gbc);
@@ -824,7 +865,7 @@ public class MainApp {
 
             // Display Reservation Date
             gbc.gridx = 0;
-            gbc.gridy = 2;
+            gbc.gridy = 3;
             reservationPanel.add(new JLabel("Reservation Date:"), gbc);
 
             gbc.gridx = 1;
@@ -832,7 +873,7 @@ public class MainApp {
 
             // Display Reservation State
             gbc.gridx = 0;
-            gbc.gridy = 3;
+            gbc.gridy = 4;
             reservationPanel.add(new JLabel("Reservation State:"), gbc);
 
             gbc.gridx = 1;
@@ -856,11 +897,89 @@ public class MainApp {
         return userReservationsPanel;
     }
 
-    private void loadUserReservations(Long userId, DefaultListModel<ReservationDTO> reservationListModel) {
+    private void modifyReservation(ReservationDTO reservation) {
+        JPanel modifyPanel = new JPanel(new GridLayout(0, 2));
+
+        JTextField newDateField = new JTextField(reservation.getDate().toString());
+        JTextField newPassengerCountField = new JTextField(String.valueOf(reservation.getFlight().getPassengerCount()));
+
+        modifyPanel.add(new JLabel("New Date:"));
+        modifyPanel.add(newDateField);
+        modifyPanel.add(new JLabel("New Passenger Count:"));
+        modifyPanel.add(newPassengerCountField);
+
+        int result = JOptionPane.showConfirmDialog(frame, modifyPanel, "Modify Reservation", JOptionPane.OK_CANCEL_OPTION);
+        if (result == JOptionPane.OK_OPTION) {
+            try {
+                Date newDate = new SimpleDateFormat("yyyy-MM-dd").parse(newDateField.getText().trim());
+                int newPassengerCount = Integer.parseInt(newPassengerCountField.getText().trim());
+
+                reservationController.updateReservation(reservation.getNumber(), newDate, newPassengerCount); // Cambiado de modify a update
+                JOptionPane.showMessageDialog(frame, "Reservation modified successfully.");
+            } catch (ParseException e) {
+                JOptionPane.showMessageDialog(frame, "Invalid date format. Please use yyyy-MM-dd.");
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(frame, "Invalid number of passengers. Please enter a valid number.");
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(frame, "Error modifying reservation: " + ex.getMessage());
+            }
+        }
+    }
+
+    // Método para eliminar reservas
+    private void deleteReservation(ReservationDTO reservation) {
+        int confirmation = JOptionPane.showConfirmDialog(frame, "Are you sure you want to delete this reservation?", "Delete Confirmation", JOptionPane.YES_NO_OPTION);
+        if (confirmation == JOptionPane.YES_OPTION) {
+            try {
+                reservationController.deleteReservation(reservation.getNumber());
+                JOptionPane.showMessageDialog(frame, "Reservation deleted successfully.");
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(frame, "Error deleting reservation: " + ex.getMessage());
+            }
+        }
+    }
+
+    private void loadUserReservations(Long userId, DefaultListModel<ReservationDTO> reservationListModel, String sortBy, boolean ascending) {
         SwingWorker<List<ReservationDTO>, Void> worker = new SwingWorker<>() {
             @Override
             protected List<ReservationDTO> doInBackground() throws Exception {
-                return reservationController.getUserReservations(userId);
+                List<ReservationDTO> reservations = reservationController.getUserReservations(userId);
+
+                // Sort reservations based on the selected criteria
+                switch (sortBy) {
+                    case "Date (Closest)":
+                        reservations.sort(Comparator.comparing(ReservationDTO::getDate));
+                        break;
+                    case "Date (Furthest)":
+                        reservations.sort(Comparator.comparing(ReservationDTO::getDate).reversed());
+                        break;
+                    case "Passengers (Most)":
+                        reservations.sort(Comparator.comparingInt(reservation -> {
+                            if (reservation.getFlight() != null) {
+                                return reservation.getFlight().getPassengerCount(); // Asegúrate de que FlightDTO tenga este método
+                            } else {
+                                return 0; // Si no hay vuelo, usar 0
+                            }
+                        }));
+                        break;
+                    case "Passengers (Least)":
+                        reservations.sort(Comparator.comparingInt(reservation -> {
+                            if (reservation.getFlight() != null) {
+                                return reservation.getFlight().getPassengerCount(); // Asegúrate de que FlightDTO tenga este método
+                            } else {
+                                return 0; // Si no hay vuelo, usar 0
+                            }
+                        }));
+                        break;
+                    default:
+                        break;
+                }
+
+                if (!ascending) {
+                    Collections.reverse(reservations); // Si no es ascendente, invertir el orden
+                }
+
+                return reservations;
             }
 
             @Override

@@ -27,10 +27,9 @@ public class FlightDTO {
     private AirportDTO destination;
     private List<AirportDTO> stopOvers;
     private List<PassengerDTO> passengers;
-
     private List<SeatDTO> seats;
-
     private List<String> reservedSeats = new ArrayList<>(); // Para almacenar los números de asiento reservados
+    private List<PassengerDTO> passengerDTOs = new ArrayList<>();
 
     // Método para obtener los asientos reservados
     public List<String> getReservedSeats() {
@@ -42,6 +41,14 @@ public class FlightDTO {
         if (!reservedSeats.contains(seatNumber)) {
             reservedSeats.add(seatNumber);
         }
+    }
+
+    // Método para obtener la cantidad de pasajeros
+        public int getPassengerCount() {
+        if (this.passengers != null) {
+            return this.passengers.size();  // Retorna el tamaño de la lista de pasajeros
+        }
+        return 0;  // Si la lista de pasajeros es nula, retornar 0
     }
 
     @Override
