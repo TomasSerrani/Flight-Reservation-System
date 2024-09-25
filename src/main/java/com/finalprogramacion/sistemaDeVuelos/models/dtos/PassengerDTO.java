@@ -9,8 +9,8 @@ import lombok.Setter;
 @NoArgsConstructor
 public class PassengerDTO {
     private Long id;
-    private String firstName;
-    private String lastName;
+    private String name;
+    private String email;
     private Long seatId;
     private UserDTO user;
     private FlightDTO flight;
@@ -18,8 +18,8 @@ public class PassengerDTO {
     @Override
     public String toString() {
         return "PassengerDTO{" +
-                "firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
+                "name='" + name + '\'' +
+                ", email='" + email + '\'' +
                 ", seatId=" + seatId +
                 ", user=" + user +
                 ", flight=" + flight +

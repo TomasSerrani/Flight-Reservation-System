@@ -54,4 +54,8 @@ public class PassengerController {
         }
         return ResponseEntity.noContent().build();
     }
+
+    public PassengerDTO findByEmail(String email){
+        return toPassengerDTO(passengerService.findByEmail(email));
+    }
 }

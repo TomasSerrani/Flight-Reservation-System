@@ -32,6 +32,18 @@ public class EntityAndDTOConverter {
         }).collect(Collectors.toList());
         dto.setStopOvers(stopOvers);
 
+        if (flight.getPassenger() != null) {
+            List<PassengerDTO> pas=  flight.getPassenger().stream().map(passenger -> {
+                PassengerDTO passengerDTO= new PassengerDTO();
+                passengerDTO.setEmail(passenger.getEmail());
+                passengerDTO.setName(passenger.getName());
+                passengerDTO.setId(passenger.getId());
+                passengerDTO.setSeatId(passenger.getSeat().getId());
+                return passengerDTO;
+            }).collect(Collectors.toList());
+            dto.setPassengers(pas);
+        }
+
         return dto;
     }
     public static Flight dtoToFlight (FlightDTO flightDTO) {
@@ -292,8 +304,8 @@ public class EntityAndDTOConverter {
     public static PassengerDTO toPassengerDTO(Passenger passenger) {
         PassengerDTO dto = new PassengerDTO();
         dto.setId(passenger.getId());
-        dto.setFirstName(passenger.getFirstName());
-        dto.setLastName(passenger.getLastName());
+        dto.setName(passenger.getName());
+        dto.setEmail(passenger.getEmail());
         dto.setUser(toUserDTO(passenger.getUser()));
         dto.setFlight(toFlightDTO(passenger.getFlight()));
         return dto;
@@ -302,8 +314,8 @@ public class EntityAndDTOConverter {
     public static Passenger dtoToPassenger(PassengerDTO passengerDTO) {
         Passenger entity = new Passenger();
         entity.setId(passengerDTO.getId());
-        entity.setFirstName(passengerDTO.getFirstName());
-        entity.setLastName(passengerDTO.getLastName());
+        entity.setName(passengerDTO.getName());
+        entity.setEmail(passengerDTO.getEmail());
         entity.setUser(dtoToUser(passengerDTO.getUser()));
         entity.setFlight(dtoToFlight(passengerDTO.getFlight()));
         return entity;

@@ -36,6 +36,7 @@ public class MainApp {
     private ReservationController reservationController;
     private PaymentController paymentController;
     private UserDetailsController userDetailsController;
+    private PassengerController passengerController;
 
     private String userEmail;
 
@@ -240,7 +241,7 @@ public class MainApp {
     }
 
     private JButton createBackButton() {
-        JButton backButton = new JButton("<-Back");
+        JButton backButton = new JButton("Main Menu");
         backButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
         backButton.setBackground(new Color(70, 130, 180));
         backButton.setForeground(Color.WHITE);
@@ -921,6 +922,14 @@ public class MainApp {
                     // Step 1: Set reservation state and associate payment
                     reservation.setState("Booked");
                     reservation.setPayment(finalPayment);
+                    PassengerDTO passengerDTO= new PassengerDTO();
+                    passengerDTO.setUser(toUserDTO(currentUser));
+                    passengerDTO.setEmail(userEmail);
+                    passengerDTO.setName(currentUser.getName());
+                    passengerDTO.setFlight(flightDTO);
+                    passengerController.save(passengerDTO);
+
+
 
                     // Step 2: Create the reservation and find payment
                     reservationController.createReservation(toReservationDTO(reservation));

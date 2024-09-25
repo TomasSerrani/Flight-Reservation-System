@@ -31,9 +31,9 @@ public class PassengerService {
         Optional<Passenger> passenger = passengerRepository.findById(id);
         if (passenger.isPresent()) {
             Passenger existingPassenger = passenger.get();
-            existingPassenger.setFirstName(passengerDetails.getFirstName());
+            existingPassenger.setName(passengerDetails.getName());
             existingPassenger.setUser(passengerDetails.getUser());
-            existingPassenger.setLastName(passengerDetails.getLastName());
+            existingPassenger.setEmail(passengerDetails.getEmail());
             return passengerRepository.save(existingPassenger);
         }
             return null;
@@ -45,5 +45,9 @@ public class PassengerService {
             return true;
         }
             return false;
+    }
+
+    public Passenger findByEmail(String email){
+        return passengerRepository.findByEmail(email);
     }
 }
