@@ -16,6 +16,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
+import javax.mail.*;
+import javax.mail.internet.*;
+import java.util.Properties;
 
 import static com.finalprogramacion.sistemaDeVuelos.collectors.EntityAndDTOConverter.*;
 
@@ -75,7 +78,7 @@ public class MainApp {
 
     private JPanel createLoginPanel() {
         JPanel loginPanel = new JPanel();
-        loginPanel.setLayout(new GridLayout(3, 2));
+        loginPanel.setLayout(new GridLayout(4, 2));  // Increased to 4 rows to accommodate the new button
 
         JLabel emailLabel = new JLabel("Email:");
         JTextField emailField = new JTextField();
@@ -83,9 +86,10 @@ public class MainApp {
         JPasswordField passwordField = new JPasswordField();
         JButton loginButton = new JButton("Login");
         JButton registerButton = new JButton("Register");
+        JButton forgotPasswordButton = new JButton("Forgot Password");
 
+        // Login button logic
         loginButton.addActionListener(e -> {
-            // Implement login logic
             String email = emailField.getText();
             String password = new String(passwordField.getPassword());
             UserDetails userDetails = userDetailsController.login(email, password);
@@ -98,18 +102,32 @@ public class MainApp {
             }
         });
 
+        // Register button logic
         registerButton.addActionListener(e -> cardLayout.show(mainPanel, "Register"));
 
+        // Forgot password button logic
+        forgotPasswordButton.addActionListener(e -> {
+            String email = JOptionPane.showInputDialog(frame, "Enter your registered email:", "Reset Password", JOptionPane.PLAIN_MESSAGE);
+
+            if (email != null && !email.isEmpty()) {
+                String resetResult = requestPasswordRecovery(email);
+                JOptionPane.showMessageDialog(frame, resetResult, "Password Reset", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(frame, "Email cannot be empty.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        // Add components to the panel
         loginPanel.add(emailLabel);
         loginPanel.add(emailField);
         loginPanel.add(passwordLabel);
         loginPanel.add(passwordField);
         loginPanel.add(loginButton);
         loginPanel.add(registerButton);
+        loginPanel.add(forgotPasswordButton);  // Add the forgot password button
 
         return loginPanel;
     }
-
     private JPanel createMainMenuPanel() {
         JPanel mainMenuPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -242,6 +260,10 @@ public class MainApp {
                 return;
             }
 
+            if (validateEmail(email) == null){
+                JOptionPane.showMessageDialog(frame, "Invalid email", "Error", JOptionPane.ERROR_MESSAGE);
+            };
+
             Date dateOfBirth;
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 
@@ -272,66 +294,201 @@ public class MainApp {
         return registerPanel;
     }
 
+    public String requestPasswordRecovery(String email) {
+        // Check if the email exists in the system
+        UserDetails userDetails = userDetailsController.findByEmail(email);
+        if (userDetails == null) {
+            return "Email not found. Please enter a registered email.";
+        }
+
+        // Generate a unique token (you can use UUID for this)
+        String token = UUID.randomUUID().toString();
+
+        // Store the token in the user's details or in a separate password reset table
+        // Optionally set an expiration time for the token (e.g., valid for 24 hours)
+        userDetails.setPasswordResetToken(token);
+        userDetails.setPasswordResetExpiry(new Date(System.currentTimeMillis() + 86400000)); // 24 hours expiry
+        userDetailsController.update(userDetails.getId(), toUserDetailsDTO(userDetails));
+
+        // Send a password reset email
+        String resetLink = "https://yourapp.com/reset-password?token=" + token;
+        sendPasswordResetEmail(userDetails.getEmail(), resetLink);
+
+        return "Password recovery email sent. Please check your inbox.";
+    }
+
+
+    private void sendPasswordResetEmail(String recipientEmail, String resetLink) {
+        // Set up the SMTP server properties
+        String host = "smtp.gmail.com"; // SMTP server (for Gmail)
+        String port = "587";  // SMTP port (TLS)
+        String username = "sistemreservation@gmail.com"; // Replace with your email
+        String password = "khargwilgowwsemy"; // Replace with your app password or actual password
+
+        // Set up email properties
+        Properties props = new Properties();
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.host", host);
+        props.put("mail.smtp.port", port);
+        props.put("mail.smtp.ssl.trust", host);
+
+        // Authenticate the email session
+        Session session = Session.getInstance(props, new javax.mail.Authenticator() {
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(username, password);
+            }
+        });
+
+        try {
+            // Create a new email message
+            Message message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(username)); // From email
+            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipientEmail)); // To email
+            message.setSubject("Password Reset Request"); // Email subject
+
+            // Email body content
+            String emailContent = "<h3>Password Reset Request</h3>"
+                    + "<p>You requested to reset your password. Click the link below to reset it:</p>"
+                    + "<a href='" + resetLink + "'>Reset Password</a>"
+                    + "<p>If you did not request this, please ignore this email.</p>";
+
+            message.setContent(emailContent, "text/html"); // HTML content
+
+            // Send the email
+            Transport.send(message);
+
+            System.out.println("Password reset email sent successfully.");
+
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public String resetPassword(String token, String newPassword) {
+        // Find the user with the given reset token
+        UserDetails userDetails = userDetailsController.findByPasswordResetToken(token);
+        if (userDetails == null) {
+            return "Invalid or expired token.";
+        }
+
+        // Check if the token has expired
+        if (userDetails.getPasswordResetExpiry().before(new Date())) {
+            return "The reset token has expired. Please request a new password reset.";
+        }
+
+        // Validate the new password (you can add more validation logic here)
+        if (newPassword == null || newPassword.isEmpty()) {
+            return "Password cannot be empty.";
+        }
+
+        // Update the user's password and clear the reset token
+        userDetails.setPassword(newPassword);  // Hash the password before saving it
+        userDetails.setPasswordResetToken(null);  // Clear the token
+        userDetails.setPasswordResetExpiry(null);  // Clear the expiry
+        userDetailsController.update(userDetails.getId(), toUserDetailsDTO(userDetails));
+
+        return "Your password has been successfully reset.";
+    }
+
+    public String validateEmail(String email) {
+        // Check if email is empty
+        if (email == null || email.isEmpty()) {
+            return "Email cannot be empty.";
+        }
+
+        // Check if email format is valid using regex
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+        if (!email.matches(emailRegex)) {
+            return "Invalid email format.";
+        }
+
+        // Check if email is already registered (using a user details controller or service)
+        UserDetails existingUser = userDetailsController.findByEmail(email);
+        if (existingUser != null) {
+            return "This email is already registered. Please use a different email.";
+        }
+
+        // If all validations pass, return null to indicate success
+        return null;
+    }
+
 
     private JPanel createFlightSearchPanel() {
         JPanel flightSearchPanel = new JPanel(new BorderLayout());
-        flightSearchPanel.setBackground(Color.LIGHT_GRAY); // Fondo suave
+        flightSearchPanel.setBackground(Color.LIGHT_GRAY); // Soft background color
 
-        // Panel para los campos de búsqueda de vuelos (origen, destino, y botón buscar)
-        JPanel searchPanel = new JPanel(new GridLayout(4, 2, 10, 10)); // Espaciado entre componentes
+        // Panel for the search fields (origin, destination, departure date, passengers, and search button)
+        JPanel searchPanel = new JPanel(new GridLayout(5, 2, 10, 10)); // Adjusted for new components
 
         JLabel originLabel = new JLabel("Origin:");
-        originLabel.setFont(new Font("Segoe UI", Font.BOLD, 14)); // Fuente más grande y negrita
+        originLabel.setFont(new Font("Segoe UI", Font.BOLD, 14)); // Bigger bold font
         JComboBox<String> originComboBox = new JComboBox<>();
 
         JLabel destinationLabel = new JLabel("Destination:");
         destinationLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
         JComboBox<String> destinationComboBox = new JComboBox<>();
 
+        // New components for departure date and number of passengers
+        JLabel departureDateLabel = new JLabel("Departure Date:");
+        departureDateLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        JTextField departureDateField = new JTextField();  // Alternatively, you could use a JDatePicker if available
+        departureDateField.setToolTipText("Format: YYYY-MM-DD");
+
+        JLabel passengersLabel = new JLabel("Passengers:");
+        passengersLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        JSpinner passengersSpinner = new JSpinner(new SpinnerNumberModel(1, 1, 10, 1));  // Min: 1, Max: 10 passengers
+
         JButton searchButton = new JButton("Search");
         searchButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        searchButton.setBackground(new Color(70, 130, 180)); // Color de fondo del botón
-        searchButton.setForeground(Color.WHITE); // Color de texto del botón
+        searchButton.setBackground(new Color(70, 130, 180)); // Background color for the button
+        searchButton.setForeground(Color.WHITE); // Text color for the button
         searchButton.setFocusPainted(false);
 
+        // Add components to the search panel
         searchPanel.add(originLabel);
         searchPanel.add(originComboBox);
         searchPanel.add(destinationLabel);
         searchPanel.add(destinationComboBox);
-        searchPanel.add(new JLabel()); // Empty cell para mantener la estructura
+        searchPanel.add(departureDateLabel);
+        searchPanel.add(departureDateField);
+        searchPanel.add(passengersLabel);
+        searchPanel.add(passengersSpinner);
+        searchPanel.add(new JLabel()); // Empty cell to maintain layout
         searchPanel.add(searchButton);
 
-        // Agregar el panel de búsqueda al centro
+        // Add the search panel to the north region of flightSearchPanel
         flightSearchPanel.add(searchPanel, BorderLayout.NORTH);
 
-        // Lista para mostrar los resultados de la búsqueda de vuelos
+        // List to show flight search results
         JList<FlightDTO> flightList = new JList<>();
         JScrollPane flightScrollPane = new JScrollPane(flightList);
-        flightScrollPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Margen en el JScrollPane
+        flightScrollPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Add margin to JScrollPane
         flightSearchPanel.add(flightScrollPane, BorderLayout.CENTER);
-
-        // Configurar el botón de búsqueda
-        searchButton.setPreferredSize(new Dimension(100, 40));
 
         // Populate JComboBoxes with airport names
         populateFlightComboBoxes(originComboBox, destinationComboBox);
 
+        // Search button action logic
         searchButton.addActionListener(e -> {
             String origin = (String) originComboBox.getSelectedItem();
             String destination = (String) destinationComboBox.getSelectedItem();
+            String departureDate = departureDateField.getText();  // Get the departure date
+            int passengers = (Integer) passengersSpinner.getValue();  // Get the number of passengers
 
-            if (origin != null && destination != null) {
-                List<FlightDTO> matchingFlights = flightController.searchFlightsByOriginAndDestination(origin, destination);
+            if (origin != null && destination != null && !departureDate.isEmpty()) {
+                // Search for flights with additional parameters: origin, destination, departure date, and passengers
+                List<FlightDTO> matchingFlights = flightController.searchFlights(origin, destination, departureDate, passengers);
                 flightList.setListData(matchingFlights.toArray(new FlightDTO[0]));
             } else {
-                flightList.setListData(new FlightDTO[0]); // Clear the list
+                flightList.setListData(new FlightDTO[0]); // Clear the list if any search criteria are missing
             }
         });
 
-        // Configurar el ListCellRenderer para mostrar detalles adicionales del vuelo
+        // Configure the ListCellRenderer to show additional flight details
         flightList.setCellRenderer((list, value, index, isSelected, cellHasFocus) -> {
             JPanel panel = new JPanel(new GridLayout(1, 3));
-            panel.setBorder(BorderFactory.createLineBorder(Color.GRAY)); // Borde para las filas
+            panel.setBorder(BorderFactory.createLineBorder(Color.GRAY)); // Add border to rows
             JLabel numLabel = new JLabel("Flight number: " + value.getFlightNum());
             JLabel departureLabel = new JLabel("Departure: " + value.getDepartureDate() + " " + value.getDepartureTime());
             JLabel priceLabel = new JLabel("Price: " + value.getPrice());
@@ -351,15 +508,15 @@ public class MainApp {
             return panel;
         });
 
-        // Panel inferior para botones (Main Menu y Select Flight)
-        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER)); // Usar FlowLayout para centrar botones
+        // Bottom panel for Main Menu and Select Flight buttons
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER)); // Use FlowLayout to center buttons
 
-        // Botón "Main Menu"
+        // "Main Menu" button
         JButton mainMenuButton = new JButton("Main Menu");
         mainMenuButton.addActionListener(e -> cardLayout.show(mainPanel, "MainMenu"));
         bottomPanel.add(mainMenuButton);
 
-        // Botón "Seleccionar vuelo"
+        // "Select Flight" button
         JButton selectFlightButton = new JButton("Select Flight");
         selectFlightButton.addActionListener(e -> {
             FlightDTO selectedFlight = flightList.getSelectedValue();
@@ -369,23 +526,27 @@ public class MainApp {
         });
         bottomPanel.add(selectFlightButton);
 
-        // Añadir el panel inferior al flightSearchPanel
+        // Add the bottom panel to flightSearchPanel
         flightSearchPanel.add(bottomPanel, BorderLayout.SOUTH);
 
         return flightSearchPanel;
     }
 
-
+    // Modified method to accommodate the new search criteria (departureDate and passengers)
     private void populateFlightComboBoxes(JComboBox<String> originComboBox, JComboBox<String> destinationComboBox) {
-        // Obtener la lista de vuelos desde el servicio
+        // Get the list of flights from the service
         List<FlightDTO> flights = flightController.getAllFlights();
 
         for (FlightDTO flight : flights) {
             String originFlightInfo = flight.getOrigin().getCity();
-            originComboBox.addItem(originFlightInfo);
+            if (((DefaultComboBoxModel<String>) originComboBox.getModel()).getIndexOf(originFlightInfo) == -1) {
+                originComboBox.addItem(originFlightInfo);  // Avoid duplicate entries
+            }
 
             String destinationFlightInfo = flight.getDestination().getCity();
-            destinationComboBox.addItem(destinationFlightInfo);
+            if (((DefaultComboBoxModel<String>) destinationComboBox.getModel()).getIndexOf(destinationFlightInfo) == -1) {
+                destinationComboBox.addItem(destinationFlightInfo);  // Avoid duplicate entries
+            }
         }
     }
 

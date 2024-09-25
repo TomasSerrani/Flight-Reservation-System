@@ -75,4 +75,8 @@ public class UserDetailsController {
         UserDetails userDetails = userDetailsService.getUserByEmail(email);
         return userDetails;
     }
+
+    public UserDetails findByPasswordResetToken(String token){
+        return userDetailsService.findByPasswordResetToken(token);
+    }
 }

@@ -8,6 +8,8 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -70,12 +72,27 @@ public class FlightService {
         }
         return false;
     }
-    public List<Flight> findByOriginAndDestination(String originName, String destinationName) {
-        Airport origin = airportRepository.findByCity(originName);
-        Airport destination = airportRepository.findByCity(destinationName);
-        if (origin != null && destination != null) {
-            return flightRepository.findByOriginAndDestination(origin,destination);
+
+    public List<Flight> searchFlights(String origin, String destination, String departureDate, int passengers) {
+        // Parse the departure date (assuming it comes as a String in format YYYY-MM-DD)
+        LocalDate parsedDepartureDate;
+        try {
+            parsedDepartureDate = LocalDate.parse(departureDate);
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException("Invalid date format. Expected YYYY-MM-DD.");
         }
-        return null;
+
+        Airport origin1 = airportRepository.findByCity(origin);
+        Airport destination1 = airportRepository.findByCity(destination);
+
+        // Fetch all flights that match the origin, destination, and departure date
+        List<Flight> matchingFlights = flightRepository.findByOriginAndDestinationAndDepartureDate(origin1, destination1, parsedDepartureDate);
+
+        // Filter flights that have enough available seats for the given number of passengers
+        List<Flight> availableFlights = matchingFlights.stream()
+                .filter(flight -> flight.getAvailableSeats() >= passengers).toList();
+
+        return availableFlights;
     }
+
 }

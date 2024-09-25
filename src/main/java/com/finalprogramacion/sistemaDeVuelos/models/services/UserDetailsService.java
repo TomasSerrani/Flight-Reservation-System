@@ -63,4 +63,10 @@ public class UserDetailsService {
         return null;
     }
 
+    public UserDetails findByPasswordResetToken(String token) {
+        // Query the database for a user with the given reset token
+        return userDetailsRepository.findByPasswordResetToken(token);
+    }
+
+
 }
