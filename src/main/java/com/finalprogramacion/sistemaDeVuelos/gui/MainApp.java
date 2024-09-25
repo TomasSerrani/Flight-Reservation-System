@@ -77,24 +77,84 @@ public class MainApp {
     }
 
     private JPanel createLoginPanel() {
-        JPanel loginPanel = new JPanel();
-        loginPanel.setLayout(new GridLayout(4, 2));  // Increased to 4 rows to accommodate the new button
+        JPanel loginPanel = new JPanel(new BorderLayout()); // Use BorderLayout for better structure
+        loginPanel.setBackground(Color.LIGHT_GRAY); // Soft background color
+
+        // Create a panel for the input fields and buttons
+        JPanel inputPanel = new JPanel(new GridBagLayout()); // Use GridBagLayout for better control
+        GridBagConstraints gbc = new GridBagConstraints();
+        inputPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20)); // Add margins
+        inputPanel.setBackground(Color.LIGHT_GRAY);
 
         JLabel emailLabel = new JLabel("Email:");
-        JTextField emailField = new JTextField();
-        JLabel passwordLabel = new JLabel("Password:");
-        JPasswordField passwordField = new JPasswordField();
-        JButton loginButton = new JButton("Login");
-        JButton registerButton = new JButton("Register");
-        JButton forgotPasswordButton = new JButton("Forgot Password");
+        emailLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        JTextField emailField = new JTextField(15); // Set fixed width for text field
 
-        // Login button logic
+        JLabel passwordLabel = new JLabel("Password:");
+        passwordLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        JPasswordField passwordField = new JPasswordField(15);
+
+        JButton loginButton = new JButton("Login");
+        loginButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        loginButton.setBackground(new Color(70, 130, 180));
+        loginButton.setForeground(Color.WHITE);
+        loginButton.setFocusPainted(false);
+
+        JButton registerButton = new JButton("Register");
+        registerButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        registerButton.setBackground(new Color(70, 130, 180));
+        registerButton.setForeground(Color.WHITE);
+        registerButton.setFocusPainted(false);
+
+        // Smaller "Forgot Password" button and centered
+        JButton forgotPasswordButton = new JButton("Forgot Password");
+        forgotPasswordButton.setFont(new Font("Segoe UI", Font.BOLD, 12));  // Slightly smaller font
+        forgotPasswordButton.setBackground(new Color(255, 165, 0)); // Orange color
+        forgotPasswordButton.setForeground(Color.WHITE);
+        forgotPasswordButton.setFocusPainted(false);
+        forgotPasswordButton.setPreferredSize(new Dimension(140, 30)); // Slightly smaller size
+
+        // Add components to the input panel using GridBagLayout
+        gbc.insets = new Insets(10, 10, 10, 10);  // Spacing between components
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        inputPanel.add(emailLabel, gbc);
+
+        gbc.gridx = 1;
+        inputPanel.add(emailField, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        inputPanel.add(passwordLabel, gbc);
+
+        gbc.gridx = 1;
+        inputPanel.add(passwordField, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.gridwidth = 2;
+        inputPanel.add(loginButton, gbc);
+
+        gbc.gridy = 3;
+        inputPanel.add(registerButton, gbc);
+
+        // Center the "Forgot Password" button with a smaller size
+        gbc.gridy = 4;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER; // Centering the button
+        inputPanel.add(forgotPasswordButton, gbc);
+
+        // Add the input panel to the center of the login panel
+        loginPanel.add(inputPanel, BorderLayout.CENTER);
+
+        // Logic for buttons
         loginButton.addActionListener(e -> {
             String email = emailField.getText();
             String password = new String(passwordField.getPassword());
             UserDetails userDetails = userDetailsController.login(email, password);
             if (userDetails != null) {
-                // Go to main menu panel
                 cardLayout.show(mainPanel, "MainMenu");
                 this.userEmail = userDetails.getEmail();
             } else {
@@ -102,10 +162,8 @@ public class MainApp {
             }
         });
 
-        // Register button logic
         registerButton.addActionListener(e -> cardLayout.show(mainPanel, "Register"));
 
-        // Forgot password button logic
         forgotPasswordButton.addActionListener(e -> {
             String email = JOptionPane.showInputDialog(frame, "Enter your registered email:", "Reset Password", JOptionPane.PLAIN_MESSAGE);
 
@@ -117,48 +175,59 @@ public class MainApp {
             }
         });
 
-        // Add components to the panel
-        loginPanel.add(emailLabel);
-        loginPanel.add(emailField);
-        loginPanel.add(passwordLabel);
-        loginPanel.add(passwordField);
-        loginPanel.add(loginButton);
-        loginPanel.add(registerButton);
-        loginPanel.add(forgotPasswordButton);  // Add the forgot password button
-
         return loginPanel;
     }
-    private JPanel createMainMenuPanel() {
-        JPanel mainMenuPanel = new JPanel(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        JLabel welcomeLabel = new JLabel("Welcome to the Flight Reservation System");
-        welcomeLabel.setFont(new Font("Arial", Font.BOLD, 18));
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.gridwidth = 2;
-        mainMenuPanel.add(welcomeLabel, gbc);
+
+    private JPanel createMainMenuPanel() {
+        JPanel mainMenuPanel = new JPanel(new BorderLayout()); // Use BorderLayout for better structure
+        mainMenuPanel.setBackground(Color.LIGHT_GRAY); // Soft background color
+
+        // Title label
+        JLabel welcomeLabel = new JLabel("Flight Reservation System", SwingConstants.CENTER);
+        welcomeLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        welcomeLabel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0)); // Add margin around the label
+        mainMenuPanel.add(welcomeLabel, BorderLayout.NORTH);
+
+        // Panel for the buttons
+        JPanel buttonPanel = new JPanel(new GridLayout(4, 1, 10, 10)); // 4 buttons with spacing
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40)); // Margins around the panel
+        buttonPanel.setBackground(Color.LIGHT_GRAY);
 
         JButton searchFlightsButton = new JButton("Search Flights");
-        gbc.gridy = 1;
-        gbc.gridwidth = 1;
-        mainMenuPanel.add(searchFlightsButton, gbc);
+        searchFlightsButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        searchFlightsButton.setBackground(new Color(70, 130, 180));
+        searchFlightsButton.setForeground(Color.WHITE);
+        searchFlightsButton.setFocusPainted(false);
 
-        JButton viewReservationsButton = new JButton("View My Reservations");
-        gbc.gridx = 1;
-        mainMenuPanel.add(viewReservationsButton, gbc);
+        JButton viewReservationsButton = new JButton("My Reservations");
+        viewReservationsButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        viewReservationsButton.setBackground(new Color(70, 130, 180));
+        viewReservationsButton.setForeground(Color.WHITE);
+        viewReservationsButton.setFocusPainted(false);
 
-        JButton viewPaymentsButton = new JButton("View My Payments");
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        mainMenuPanel.add(viewPaymentsButton, gbc);
+        JButton viewPaymentsButton = new JButton("My Payments");
+        viewPaymentsButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        viewPaymentsButton.setBackground(new Color(70, 130, 180));
+        viewPaymentsButton.setForeground(Color.WHITE);
+        viewPaymentsButton.setFocusPainted(false);
 
         JButton logoutButton = new JButton("Logout");
-        gbc.gridx = 1;
-        mainMenuPanel.add(logoutButton, gbc);
+        logoutButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        logoutButton.setBackground(new Color(255, 69, 0)); // Orange-red color for logout
+        logoutButton.setForeground(Color.WHITE);
+        logoutButton.setFocusPainted(false);
 
+        // Add buttons to the panel
+        buttonPanel.add(searchFlightsButton);
+        buttonPanel.add(viewReservationsButton);
+        buttonPanel.add(viewPaymentsButton);
+        buttonPanel.add(logoutButton);
+
+        // Add button panel to the center of the main menu panel
+        mainMenuPanel.add(buttonPanel, BorderLayout.CENTER);
+
+        // Logic for buttons
         searchFlightsButton.addActionListener(e -> cardLayout.show(mainPanel, "FlightSearch"));
         viewReservationsButton.addActionListener(e -> cardLayout.show(mainPanel, "UserReservations"));
         viewPaymentsButton.addActionListener(e -> cardLayout.show(mainPanel, "UserPayments"));
@@ -171,98 +240,116 @@ public class MainApp {
     }
 
     private JButton createBackButton() {
-        JButton backButton = new JButton("<- Back");
-        backButton.addActionListener(e -> cardLayout.show(mainPanel, "Login"));
-        return backButton;
+        JButton backButton = new JButton("<-Back");
+        backButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        backButton.setBackground(new Color(70, 130, 180));
+        backButton.setForeground(Color.WHITE);
+        backButton.setFocusPainted(false);
+            backButton.addActionListener(e -> cardLayout.show(mainPanel, "Login"));
+            return backButton;
     }
 
     private JPanel createRegisterPanel() {
         JPanel registerPanel = new JPanel(new GridBagLayout());
+        registerPanel.setBackground(Color.LIGHT_GRAY); // Soft background color
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.insets = new Insets(10, 10, 10, 10);  // More generous padding for a cleaner look
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        // Botón de retroceso
+        // Back button to return to the login screen
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.WEST;
-        registerPanel.add(createBackButton(), gbc);
+        JButton backButton = createBackButton();
+        registerPanel.add(backButton, gbc);
 
-        // Etiqueta y campo de nombre
+        // Name label and field
         gbc.gridy++;
         gbc.gridwidth = 1;
         JLabel nameLabel = new JLabel("Name:");
+        nameLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
         registerPanel.add(nameLabel, gbc);
 
         JTextField nameField = new JTextField(15);
         gbc.gridx = 1;
         registerPanel.add(nameField, gbc);
 
-        // Etiqueta y campo de fecha de nacimiento
-        gbc.gridx = 0; // Vuelve a la columna 0
-        gbc.gridy++; // Incrementa la fila
+        // Date of birth label and field
+        gbc.gridx = 0;
+        gbc.gridy++;
         JLabel dateOfBirthLabel = new JLabel("Date of birth: DD/MM/YYYY");
+        dateOfBirthLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
         registerPanel.add(dateOfBirthLabel, gbc);
 
         JTextField dateOfBirthField = new JTextField(15);
         gbc.gridx = 1;
         registerPanel.add(dateOfBirthField, gbc);
 
-        // Etiqueta y campo de correo electrónico
-        gbc.gridx = 0; // Vuelve a la columna 0
-        gbc.gridy++; // Incrementa la fila
+        // Email label and field
+        gbc.gridx = 0;
+        gbc.gridy++;
         JLabel emailLabel = new JLabel("Email:");
+        emailLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
         registerPanel.add(emailLabel, gbc);
 
         JTextField emailField = new JTextField(15);
         gbc.gridx = 1;
         registerPanel.add(emailField, gbc);
 
-        // Etiqueta y campo de contraseña
-        gbc.gridx = 0; // Vuelve a la columna 0
-        gbc.gridy++; // Incrementa la fila
+        // Password label and field
+        gbc.gridx = 0;
+        gbc.gridy++;
         JLabel passwordLabel = new JLabel("Password:");
+        passwordLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
         registerPanel.add(passwordLabel, gbc);
 
         JPasswordField passwordField = new JPasswordField(15);
         gbc.gridx = 1;
         registerPanel.add(passwordField, gbc);
 
-        // Etiqueta y campo de teléfono
-        gbc.gridx = 0; // Vuelve a la columna 0
-        gbc.gridy++; // Incrementa la fila
+        // Phone label and field
+        gbc.gridx = 0;
+        gbc.gridy++;
         JLabel phoneLabel = new JLabel("Phone:");
+        phoneLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
         registerPanel.add(phoneLabel, gbc);
 
         JTextField phoneField = new JTextField(15);
         gbc.gridx = 1;
         registerPanel.add(phoneField, gbc);
 
-        // Botón de registro
+        // Register button (smaller size and centered)
         JButton registerButton = new JButton("Register");
-        gbc.gridx = 0; // Vuelve a la columna 0
-        gbc.gridy++; // Incrementa la fila
+        registerButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        registerButton.setBackground(new Color(70, 130, 180));
+        registerButton.setForeground(Color.WHITE);
+        registerButton.setFocusPainted(false);
+        registerButton.setPreferredSize(new Dimension(140, 35)); // Set a fixed size for the button
+
+        gbc.gridx = 0;
+        gbc.gridy++;
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
-        gbc.fill = GridBagConstraints.NONE;
+        gbc.fill = GridBagConstraints.NONE; // Center the register button
         registerPanel.add(registerButton, gbc);
 
+        // Action listener for registration logic
         registerButton.addActionListener(e -> {
-            // Validación y registro de usuario
             String name = nameField.getText().trim();
             String email = emailField.getText().trim();
             String password = new String(passwordField.getPassword()).trim();
             String phone = phoneField.getText().trim();
             String dateOfBirthText = dateOfBirthField.getText().trim();
+
             if (name.isEmpty() || email.isEmpty() || password.isEmpty() || phone.isEmpty() || dateOfBirthText.isEmpty()) {
                 JOptionPane.showMessageDialog(frame, "All fields are required.", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            if (validateEmail(email) == null){
+            if (validateEmail(email) == null) {
                 JOptionPane.showMessageDialog(frame, "Invalid email", "Error", JOptionPane.ERROR_MESSAGE);
-            };
+            }
 
             Date dateOfBirth;
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
@@ -278,11 +365,10 @@ public class MainApp {
             UserDTO createdUser = new UserDTO(name, dateOfBirth, createdUserDetails);
 
             try {
-                if (userDetailsController.findByEmail(createdUserDetails.getEmail()) == null){
+                if (userDetailsController.findByEmail(createdUserDetails.getEmail()) == null) {
                     userController.createUser(createdUser);
                     JOptionPane.showMessageDialog(frame, "Registration successful");
-                }
-                else {
+                } else {
                     JOptionPane.showMessageDialog(frame, "Registration failed: Email already used", "Error", JOptionPane.ERROR_MESSAGE);
                 }
                 cardLayout.show(mainPanel, "Login");
@@ -911,6 +997,7 @@ public class MainApp {
 
     private JPanel createUserReservationsPanel() {
         JPanel userReservationsPanel = new JPanel(new BorderLayout());
+        userReservationsPanel.setBackground(Color.LIGHT_GRAY); // Soft background
 
         DefaultListModel<ReservationDTO> reservationListModel = new DefaultListModel<>();
         JList<ReservationDTO> reservationList = new JList<>(reservationListModel);
@@ -926,27 +1013,64 @@ public class MainApp {
             ex.printStackTrace();
         }
 
-        // Add sorting options
+        // Sorting options and buttons panel
+        JPanel buttonPanel = new JPanel(new GridBagLayout());
+        buttonPanel.setBackground(Color.LIGHT_GRAY); // Set background color for the button panel
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);  // Generous padding for better spacing
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        // Sorting label and combo box
         JLabel sortByLabel = new JLabel("Sort by:");
+        sortByLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        buttonPanel.add(sortByLabel, gbc);
+
         String[] sortingOptions = {"Date (Closest)", "Date (Furthest)", "Passengers (Most)", "Passengers (Least)"};
         JComboBox<String> sortingComboBox = new JComboBox<>(sortingOptions);
+        sortingComboBox.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        gbc.gridx = 1;
+        buttonPanel.add(sortingComboBox, gbc);
 
-        // Add refresh and main menu buttons
+        // Refresh button
         JButton refreshButton = new JButton("Refresh");
-        JButton backToMainMenuButton = new JButton("Main Menu");
-        backToMainMenuButton.addActionListener(e -> cardLayout.show(mainPanel, "MainMenu"));
+        refreshButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        refreshButton.setBackground(new Color(70, 130, 180));  // Consistent color
+        refreshButton.setForeground(Color.WHITE);
+        refreshButton.setFocusPainted(false);
+        gbc.gridx = 2;
+        buttonPanel.add(refreshButton, gbc);
 
-        // New buttons for modify and delete
+        // Modify button
         JButton modifyButton = new JButton("Modify");
-        JButton deleteButton = new JButton("Delete");
+        modifyButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        modifyButton.setBackground(new Color(70, 130, 180));
+        modifyButton.setForeground(Color.WHITE);
+        modifyButton.setFocusPainted(false);
+        gbc.gridx = 3;
+        buttonPanel.add(modifyButton, gbc);
 
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        buttonPanel.add(sortByLabel);
-        buttonPanel.add(sortingComboBox);
-        buttonPanel.add(refreshButton);
-        buttonPanel.add(modifyButton);
-        buttonPanel.add(deleteButton);
-        buttonPanel.add(backToMainMenuButton);
+        // Delete button
+        JButton deleteButton = new JButton("Delete");
+        deleteButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        deleteButton.setBackground(new Color(255, 69, 0)); // Red for delete
+        deleteButton.setForeground(Color.WHITE);
+        deleteButton.setFocusPainted(false);
+        gbc.gridx = 4;
+        buttonPanel.add(deleteButton, gbc);
+
+        // Back to main menu button
+        JButton backToMainMenuButton = new JButton("Main Menu");
+        backToMainMenuButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        backToMainMenuButton.setBackground(new Color(70, 130, 180));
+        backToMainMenuButton.setForeground(Color.WHITE);
+        backToMainMenuButton.setFocusPainted(false);
+        gbc.gridx = 5;
+        buttonPanel.add(backToMainMenuButton, gbc);
+
+        // Add button panel to the top of the userReservationsPanel
+        userReservationsPanel.add(buttonPanel, BorderLayout.NORTH);
 
         // Refresh button action
         refreshButton.addActionListener(e -> {
@@ -955,7 +1079,7 @@ public class MainApp {
                 if (userDetails1 != null) {
                     // Load reservations with selected sorting option
                     String selectedSortOption = (String) sortingComboBox.getSelectedItem();
-                    boolean ascending = !selectedSortOption.equals("Date (Furthest)");  // Ascendente para "Date (Closest)"
+                    boolean ascending = !selectedSortOption.equals("Date (Furthest)");  // Ascending for "Date (Closest)"
                     loadUserReservations(userDetails1.getId(), reservationListModel, selectedSortOption, ascending);
                 }
             } catch (Exception ex) {
@@ -985,60 +1109,58 @@ public class MainApp {
             }
         });
 
-        // Set custom cell renderer to divide each reservation into its own container
+        // Custom renderer for reservation list
         reservationList.setCellRenderer((list, value, index, isSelected, cellHasFocus) -> {
             JPanel reservationPanel = new JPanel(new GridBagLayout());
-            GridBagConstraints gbc = new GridBagConstraints();
-            gbc.insets = new Insets(5, 5, 5, 5);  // Padding
-            gbc.fill = GridBagConstraints.HORIZONTAL;
-
-            // Set border around each reservation to visually separate them
+            GridBagConstraints cellGbc = new GridBagConstraints();
+            cellGbc.insets = new Insets(5, 5, 5, 5);  // Padding inside each reservation panel
+            cellGbc.fill = GridBagConstraints.HORIZONTAL;
             reservationPanel.setBorder(BorderFactory.createTitledBorder("Reservation Details"));
 
             // Display Reservation Number
-            gbc.gridx = 0;
-            gbc.gridy = 0;
-            reservationPanel.add(new JLabel("Reservation Number:"), gbc);
+            cellGbc.gridx = 0;
+            cellGbc.gridy = 0;
+            reservationPanel.add(new JLabel("Reservation Number:"), cellGbc);
 
-            gbc.gridx = 1;
-            reservationPanel.add(new JLabel(String.valueOf(value.getNumber())), gbc);
+            cellGbc.gridx = 1;
+            reservationPanel.add(new JLabel(String.valueOf(value.getNumber())), cellGbc);
 
             // Display Flight Number (if available)
-            gbc.gridx = 0;
-            gbc.gridy = 1;
-            reservationPanel.add(new JLabel("Flight Number:"), gbc);
+            cellGbc.gridx = 0;
+            cellGbc.gridy = 1;
+            reservationPanel.add(new JLabel("Flight Number:"), cellGbc);
 
             if (value.getFlight() != null) {
-                gbc.gridx = 1;
-                reservationPanel.add(new JLabel(value.getFlight().getFlightNum()), gbc);
+                cellGbc.gridx = 1;
+                reservationPanel.add(new JLabel(value.getFlight().getFlightNum()), cellGbc);
 
                 // Display Passenger Count
-                gbc.gridx = 0;
-                gbc.gridy = 2;
-                reservationPanel.add(new JLabel("Passenger Count:"), gbc);
+                cellGbc.gridx = 0;
+                cellGbc.gridy = 2;
+                reservationPanel.add(new JLabel("Passenger Count:"), cellGbc);
 
-                gbc.gridx = 1;
-                reservationPanel.add(new JLabel(String.valueOf(value.getFlight().getPassengerCount())), gbc); // Asegúrate de que FlightDTO tenga este método
+                cellGbc.gridx = 1;
+                reservationPanel.add(new JLabel(String.valueOf(value.getFlight().getPassengerCount())), cellGbc);
             } else {
-                gbc.gridx = 1;
-                reservationPanel.add(new JLabel("N/A"), gbc);
+                cellGbc.gridx = 1;
+                reservationPanel.add(new JLabel("N/A"), cellGbc);
             }
 
             // Display Reservation Date
-            gbc.gridx = 0;
-            gbc.gridy = 3;
-            reservationPanel.add(new JLabel("Reservation Date:"), gbc);
+            cellGbc.gridx = 0;
+            cellGbc.gridy = 3;
+            reservationPanel.add(new JLabel("Reservation Date:"), cellGbc);
 
-            gbc.gridx = 1;
-            reservationPanel.add(new JLabel(value.getDate().toString()), gbc);
+            cellGbc.gridx = 1;
+            reservationPanel.add(new JLabel(value.getDate().toString()), cellGbc);
 
             // Display Reservation State
-            gbc.gridx = 0;
-            gbc.gridy = 4;
-            reservationPanel.add(new JLabel("Reservation State:"), gbc);
+            cellGbc.gridx = 0;
+            cellGbc.gridy = 4;
+            reservationPanel.add(new JLabel("Reservation State:"), cellGbc);
 
-            gbc.gridx = 1;
-            reservationPanel.add(new JLabel(value.getState()), gbc);
+            cellGbc.gridx = 1;
+            reservationPanel.add(new JLabel(value.getState()), cellGbc);
 
             // Highlight selected reservation
             if (isSelected) {
@@ -1052,11 +1174,14 @@ public class MainApp {
             return reservationPanel;
         });
 
-        userReservationsPanel.add(buttonPanel, BorderLayout.NORTH);
-        userReservationsPanel.add(new JScrollPane(reservationList), BorderLayout.CENTER);
+        // Add reservation list to the center of the panel
+        JScrollPane scrollPane = new JScrollPane(reservationList);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));  // Add padding around the scroll pane
+        userReservationsPanel.add(scrollPane, BorderLayout.CENTER);
 
         return userReservationsPanel;
     }
+
 
     private void modifyReservation(ReservationDTO reservation) {
         JPanel modifyPanel = new JPanel(new GridLayout(0, 2));
@@ -1161,6 +1286,7 @@ public class MainApp {
 
     private JPanel createUserPaymentsPanel() {
         JPanel userPaymentsPanel = new JPanel(new BorderLayout());
+        userPaymentsPanel.setBackground(Color.LIGHT_GRAY);  // Soft background color
 
         DefaultListModel<PaymentDTO> paymentListModel = new DefaultListModel<>();
         JList<PaymentDTO> paymentList = new JList<>(paymentListModel);
@@ -1176,15 +1302,36 @@ public class MainApp {
             ex.printStackTrace();
         }
 
-        // Add refresh and main menu buttons
+        // Panel for buttons (Refresh and Main Menu)
+        JPanel buttonPanel = new JPanel(new GridBagLayout());
+        buttonPanel.setBackground(Color.LIGHT_GRAY);  // Consistent background color
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);  // Generous padding for button panel
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        // Refresh button
         JButton refreshButton = new JButton("Refresh");
+        refreshButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        refreshButton.setBackground(new Color(70, 130, 180));  // Consistent color scheme
+        refreshButton.setForeground(Color.WHITE);
+        refreshButton.setFocusPainted(false);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        buttonPanel.add(refreshButton, gbc);
+
+        // Main Menu button
         JButton backToMainMenuButton = new JButton("Main Menu");
-        backToMainMenuButton.addActionListener(e -> cardLayout.show(mainPanel, "MainMenu"));
+        backToMainMenuButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        backToMainMenuButton.setBackground(new Color(70, 130, 180));
+        backToMainMenuButton.setForeground(Color.WHITE);
+        backToMainMenuButton.setFocusPainted(false);
+        gbc.gridx = 1;
+        buttonPanel.add(backToMainMenuButton, gbc);
 
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        buttonPanel.add(refreshButton);
-        buttonPanel.add(backToMainMenuButton);
+        // Add button panel to the top of the userPaymentsPanel
+        userPaymentsPanel.add(buttonPanel, BorderLayout.NORTH);
 
+        // Refresh button action
         refreshButton.addActionListener(e -> {
             try {
                 UserDetails userDetails1 = userDetailsController.findByEmail(userEmail);
@@ -1199,39 +1346,41 @@ public class MainApp {
             }
         });
 
-        // Set custom cell renderer to divide each payment into its own container
+        // Return to Main Menu action
+        backToMainMenuButton.addActionListener(e -> cardLayout.show(mainPanel, "MainMenu"));
+
+        // Custom renderer for payment list
         paymentList.setCellRenderer((list, value, index, isSelected, cellHasFocus) -> {
             JPanel paymentPanel = new JPanel(new GridBagLayout());
-            GridBagConstraints gbc = new GridBagConstraints();
-            gbc.insets = new Insets(5, 5, 5, 5);  // Padding
-            gbc.fill = GridBagConstraints.HORIZONTAL;
+            GridBagConstraints cellGbc = new GridBagConstraints();
+            cellGbc.insets = new Insets(5, 5, 5, 5);  // Padding inside each payment panel
+            cellGbc.fill = GridBagConstraints.HORIZONTAL;
 
-            // Set border around each payment to visually separate them
             paymentPanel.setBorder(BorderFactory.createTitledBorder("Payment Details"));
 
             // Display Payment Number
-            gbc.gridx = 0;
-            gbc.gridy = 0;
-            paymentPanel.add(new JLabel("Payment Number:"), gbc);
+            cellGbc.gridx = 0;
+            cellGbc.gridy = 0;
+            paymentPanel.add(new JLabel("Payment Number:"), cellGbc);
 
-            gbc.gridx = 1;
-            paymentPanel.add(new JLabel(String.valueOf(value.getNumber())), gbc);
+            cellGbc.gridx = 1;
+            paymentPanel.add(new JLabel(String.valueOf(value.getNumber())), cellGbc);
 
             // Display Payment Type
-            gbc.gridx = 0;
-            gbc.gridy = 1;
-            paymentPanel.add(new JLabel("Payment Type:"), gbc);
+            cellGbc.gridx = 0;
+            cellGbc.gridy = 1;
+            paymentPanel.add(new JLabel("Payment Type:"), cellGbc);
 
-            gbc.gridx = 1;
-            paymentPanel.add(new JLabel(value.getType()), gbc);
+            cellGbc.gridx = 1;
+            paymentPanel.add(new JLabel(value.getType()), cellGbc);
 
             // Display Payment Amount
-            gbc.gridx = 0;
-            gbc.gridy = 2;
-            paymentPanel.add(new JLabel("Amount of Payments:"), gbc);
+            cellGbc.gridx = 0;
+            cellGbc.gridy = 2;
+            paymentPanel.add(new JLabel("Amount of Payments:"), cellGbc);
 
-            gbc.gridx = 1;
-            paymentPanel.add(new JLabel(String.valueOf(value.getAmountOfPayments())), gbc);
+            cellGbc.gridx = 1;
+            paymentPanel.add(new JLabel(String.valueOf(value.getAmountOfPayments())), cellGbc);
 
             // Highlight selected payment
             if (isSelected) {
@@ -1245,11 +1394,14 @@ public class MainApp {
             return paymentPanel;
         });
 
-        userPaymentsPanel.add(buttonPanel, BorderLayout.NORTH);
-        userPaymentsPanel.add(new JScrollPane(paymentList), BorderLayout.CENTER);
+        // Add payment list to the center of the panel
+        JScrollPane scrollPane = new JScrollPane(paymentList);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));  // Padding around the list
+        userPaymentsPanel.add(scrollPane, BorderLayout.CENTER);
 
         return userPaymentsPanel;
     }
+
 
     private void loadUserPayments(Long userId, DefaultListModel<PaymentDTO> paymentListModel) {
         SwingWorker<List<PaymentDTO>, Void> worker = new SwingWorker<>() {
