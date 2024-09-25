@@ -1,5 +1,6 @@
 package com.finalprogramacion.sistemaDeVuelos.models.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,17 +29,19 @@ public class Payment {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
+    // Break the circular reference by using @JsonBackReference
     @OneToOne
     @JoinColumn(name = "reservation_id", referencedColumnName = "id")
+    @JsonBackReference // Prevents infinite recursion during serialization
     private Reservation reservation;
 
-    public Payment(Payment payment) {
+    public void setReservationID(Long id) {
+        if (this.reservation != null) {
+            this.reservation.setId(id);
+        }
     }
 
-    public void updateReservation(Reservation reservation){
-        this.reservation= reservation;
-    }
-
+    // Additional constructors
     public Payment(Long id, Long number, String type, int amountOfPayments, User user, Reservation reservation) {
         this.id = id;
         this.number = number;
@@ -54,5 +57,4 @@ public class Payment {
         this.amountOfPayments = amountOfPayments;
         this.user = user;
     }
-
 }

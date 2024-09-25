@@ -131,26 +131,41 @@ public class EntityAndDTOConverter {
         dto.setType(payment.getType());
         dto.setNumber(payment.getNumber());
         dto.setAmountOfPayments(payment.getAmountOfPayments());
-        if(payment.getReservation() != null) {
-            dto.setReservation(toReservationDTO(payment.getReservation()));
+
+        // Avoid circular reference
+        if (payment.getReservation() != null) {
+            ReservationDTO reservationDTO = new ReservationDTO();
+            reservationDTO.setId(payment.getReservation().getId());
+            reservationDTO.setNumber(payment.getReservation().getNumber());
+            dto.setReservation(reservationDTO);  // Only minimal data
         }
-        if(payment.getUser() != null) {
+
+        if (payment.getUser() != null) {
             dto.setUser(toUserDTO(payment.getUser()));
         }
+
         return dto;
     }
+
     public static Payment dtoToPayment(PaymentDTO paymentDTO) {
         Payment entity = new Payment();
         entity.setId(paymentDTO.getId());
         entity.setType(paymentDTO.getType());
         entity.setNumber(paymentDTO.getNumber());
         entity.setAmountOfPayments(paymentDTO.getAmountOfPayments());
-        if(paymentDTO.getReservation() != null) {
-            entity.setReservation(dtoToReservation(paymentDTO.getReservation()));
+
+        // Avoid circular reference
+        if (paymentDTO.getReservation() != null) {
+            Reservation reservation = new Reservation();
+            reservation.setId(paymentDTO.getReservation().getId());
+            reservation.setNumber(paymentDTO.getReservation().getNumber());
+            entity.setReservation(reservation);  // Only minimal data
         }
-        if(paymentDTO.getUser() != null) {
+
+        if (paymentDTO.getUser() != null) {
             entity.setUser(dtoToUser(paymentDTO.getUser()));
         }
+
         return entity;
     }
 
@@ -160,15 +175,23 @@ public class EntityAndDTOConverter {
         dto.setState(reservation.getState());
         dto.setDate(reservation.getDate());
         dto.setNumber(reservation.getNumber());
+
         if (reservation.getFlight() != null) {
             dto.setFlight(toFlightDTO(reservation.getFlight()));
         }
+
+        // Avoid circular reference
         if (reservation.getPayment() != null) {
-            dto.setPayment(toPaymentDTO(reservation.getPayment()));
+            PaymentDTO paymentDTO = new PaymentDTO();
+            paymentDTO.setId(reservation.getPayment().getId());
+            paymentDTO.setNumber(reservation.getPayment().getNumber());
+            dto.setPayment(paymentDTO);  // Only minimal data
         }
-        if(reservation.getUser() != null) {
+
+        if (reservation.getUser() != null) {
             dto.setUser(toUserDTO(reservation.getUser()));
         }
+
         return dto;
     }
 
@@ -178,15 +201,23 @@ public class EntityAndDTOConverter {
         entity.setState(reservationDTO.getState());
         entity.setDate(reservationDTO.getDate());
         entity.setNumber(reservationDTO.getNumber());
+
         if (reservationDTO.getFlight() != null) {
             entity.setFlight(dtoToFlight(reservationDTO.getFlight()));
         }
+
+        // Avoid circular reference
         if (reservationDTO.getPayment() != null) {
-            entity.setPayment(dtoToPayment(reservationDTO.getPayment()));
+            Payment payment = new Payment();
+            payment.setId(reservationDTO.getPayment().getId());
+            payment.setNumber(reservationDTO.getPayment().getNumber());
+            entity.setPayment(payment);  // Only minimal data
         }
-        if(reservationDTO.getUser() != null) {
+
+        if (reservationDTO.getUser() != null) {
             entity.setUser(dtoToUser(reservationDTO.getUser()));
         }
+
         return entity;
     }
     public static UserDTO toUserDTO(User user) {

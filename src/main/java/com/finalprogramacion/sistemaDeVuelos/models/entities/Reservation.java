@@ -1,5 +1,6 @@
 package com.finalprogramacion.sistemaDeVuelos.models.entities;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -32,14 +33,23 @@ public class Reservation {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
-    @OneToOne(mappedBy = "reservation", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    // Use @JsonManagedReference to manage the circular relationship
+    @OneToOne(mappedBy = "reservation", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference // Prevents infinite recursion during serialization
     private Payment payment;
 
     @ManyToOne
     @JoinColumn(name = "flight_id", referencedColumnName = "id")
     private Flight flight;
 
-    public Reservation( Long number, Date date, String state, User user, Payment payment, Flight flight) {
+    public void setPaymentID(Long id){
+        if (this.payment != null) {
+            this.payment.setId(id);
+        }
+    }
+
+    // Additional constructors
+    public Reservation(Long number, Date date, String state, User user, Payment payment, Flight flight) {
         this.number = number;
         this.date = date;
         this.state = state;
@@ -47,6 +57,8 @@ public class Reservation {
         this.payment = payment;
         this.flight = flight;
     }
+
+    // Method to generate a reservation number
     public Long generateReservationNumber() {
         Random RANDOM = new Random();
         long min = (long) Math.pow(10, 12 - 1);

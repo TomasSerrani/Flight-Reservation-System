@@ -6,6 +6,7 @@ import com.finalprogramacion.sistemaDeVuelos.models.entities.Payment;
 import com.finalprogramacion.sistemaDeVuelos.models.services.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,30 +33,26 @@ public class PaymentController {
         return toPaymentDTO(paymentService.getPaymentById(id));
     }
 
-    @GetMapping("/user-payments")
+    @GetMapping("/user-payments/{id}")
     public List<PaymentDTO> getUserPayments(@PathVariable Long id) {
         return paymentService.getUserPayments(id).stream()
                 .map(EntityAndDTOConverter::toPaymentDTO)
                 .collect(Collectors.toList());
     }
 
-    @PostMapping
-    public PaymentDTO createPayment(PaymentDTO paymentDTO) {
-        Payment savedPayment =dtoToPayment(paymentDTO);
-        paymentService.createPayment(savedPayment);
-        return paymentDTO;
-    }
+    @Transactional
     @PutMapping("/{id}")
-    public PaymentDTO update(@PathVariable Long id, @RequestBody PaymentDTO payment) {
+    public PaymentDTO update(@PathVariable Long id, @RequestBody PaymentDTO paymentDTO) {
         Payment existingPayment = paymentService.getPaymentById(id);
         if (existingPayment != null) {
-            Payment updatedPayment = EntityAndDTOConverter.dtoToPayment(payment);
+            Payment updatedPayment = dtoToPayment(paymentDTO);
             updatedPayment.setId(id);
-            paymentService.updatePayment(id,updatedPayment);
+            paymentService.updatePayment(id, updatedPayment);
             return toPaymentDTO(updatedPayment);
         }
         return null;
     }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteById(@PathVariable Long id) {
         if (paymentService.getPaymentById(id) != null) {
@@ -65,8 +62,15 @@ public class PaymentController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping ("/{number}")
-    public Payment findByPaymentNumber(Long paymentNumber){
+    @GetMapping("/payment-number/{paymentNumber}")
+    public Payment findByPaymentNumber(@PathVariable Long paymentNumber) {
         return paymentService.getByPaymentNumber(paymentNumber);
+    }
+
+    public List<PaymentDTO> getPaymentsForReservation(Long reservationId) {
+        List<Payment> payments = paymentService.getPaymentsForReservation(reservationId);
+        return payments.stream()
+                .map(EntityAndDTOConverter::toPaymentDTO) // Convert to PaymentDTO
+                .collect(Collectors.toList());
     }
 }

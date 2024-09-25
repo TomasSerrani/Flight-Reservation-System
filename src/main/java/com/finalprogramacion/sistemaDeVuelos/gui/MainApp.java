@@ -4,7 +4,6 @@ import com.finalprogramacion.sistemaDeVuelos.AppConfig;
 import com.finalprogramacion.sistemaDeVuelos.controllers.*;
 import com.finalprogramacion.sistemaDeVuelos.models.dtos.*;
 import com.finalprogramacion.sistemaDeVuelos.models.entities.*;
-import com.finalprogramacion.sistemaDeVuelos.models.services.repositories.ReservationRepository;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
@@ -15,8 +14,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -282,16 +280,24 @@ public class MainApp {
 
     private JPanel createFlightSearchPanel() {
         JPanel flightSearchPanel = new JPanel(new BorderLayout());
+        flightSearchPanel.setBackground(Color.LIGHT_GRAY); // Fondo suave
 
         // Panel para los campos de búsqueda de vuelos (origen, destino, y botón buscar)
-        JPanel searchPanel = new JPanel(new GridLayout(3, 2));
+        JPanel searchPanel = new JPanel(new GridLayout(4, 2, 10, 10)); // Espaciado entre componentes
 
         JLabel originLabel = new JLabel("Origin:");
+        originLabel.setFont(new Font("Segoe UI", Font.BOLD, 14)); // Fuente más grande y negrita
         JComboBox<String> originComboBox = new JComboBox<>();
 
         JLabel destinationLabel = new JLabel("Destination:");
+        destinationLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
         JComboBox<String> destinationComboBox = new JComboBox<>();
+
         JButton searchButton = new JButton("Search");
+        searchButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        searchButton.setBackground(new Color(70, 130, 180)); // Color de fondo del botón
+        searchButton.setForeground(Color.WHITE); // Color de texto del botón
+        searchButton.setFocusPainted(false);
 
         searchPanel.add(originLabel);
         searchPanel.add(originComboBox);
@@ -306,27 +312,23 @@ public class MainApp {
         // Lista para mostrar los resultados de la búsqueda de vuelos
         JList<FlightDTO> flightList = new JList<>();
         JScrollPane flightScrollPane = new JScrollPane(flightList);
+        flightScrollPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Margen en el JScrollPane
         flightSearchPanel.add(flightScrollPane, BorderLayout.CENTER);
 
         // Configurar el botón de búsqueda
-        searchButton.setPreferredSize(new Dimension(100, 30));
+        searchButton.setPreferredSize(new Dimension(100, 40));
 
         // Populate JComboBoxes with airport names
         populateFlightComboBoxes(originComboBox, destinationComboBox);
 
         searchButton.addActionListener(e -> {
-            // Obtener el origen y destino seleccionados
             String origin = (String) originComboBox.getSelectedItem();
             String destination = (String) destinationComboBox.getSelectedItem();
 
             if (origin != null && destination != null) {
-                // Buscar vuelos que coincidan con el origen y destino seleccionados
                 List<FlightDTO> matchingFlights = flightController.searchFlightsByOriginAndDestination(origin, destination);
-
-                // Mostrar los vuelos en la JList
                 flightList.setListData(matchingFlights.toArray(new FlightDTO[0]));
             } else {
-                // Limpiar la lista si no se seleccionó origen o destino
                 flightList.setListData(new FlightDTO[0]); // Clear the list
             }
         });
@@ -334,6 +336,7 @@ public class MainApp {
         // Configurar el ListCellRenderer para mostrar detalles adicionales del vuelo
         flightList.setCellRenderer((list, value, index, isSelected, cellHasFocus) -> {
             JPanel panel = new JPanel(new GridLayout(1, 3));
+            panel.setBorder(BorderFactory.createLineBorder(Color.GRAY)); // Borde para las filas
             JLabel numLabel = new JLabel("Flight number: " + value.getFlightNum());
             JLabel departureLabel = new JLabel("Departure: " + value.getDepartureDate() + " " + value.getDepartureTime());
             JLabel priceLabel = new JLabel("Price: " + value.getPrice());
@@ -354,14 +357,14 @@ public class MainApp {
         });
 
         // Panel inferior para botones (Main Menu y Select Flight)
-        JPanel bottomPanel = new JPanel(new BorderLayout());
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER)); // Usar FlowLayout para centrar botones
 
-        // Botón "Main Menu" en la parte inferior izquierda
+        // Botón "Main Menu"
         JButton mainMenuButton = new JButton("Main Menu");
         mainMenuButton.addActionListener(e -> cardLayout.show(mainPanel, "MainMenu"));
-        bottomPanel.add(mainMenuButton, BorderLayout.WEST);
+        bottomPanel.add(mainMenuButton);
 
-        // Botón "Seleccionar vuelo" en la parte inferior derecha
+        // Botón "Seleccionar vuelo"
         JButton selectFlightButton = new JButton("Select Flight");
         selectFlightButton.addActionListener(e -> {
             FlightDTO selectedFlight = flightList.getSelectedValue();
@@ -369,13 +372,14 @@ public class MainApp {
                 showFlightDetails(selectedFlight);
             }
         });
-        bottomPanel.add(selectFlightButton, BorderLayout.EAST);
+        bottomPanel.add(selectFlightButton);
 
         // Añadir el panel inferior al flightSearchPanel
         flightSearchPanel.add(bottomPanel, BorderLayout.SOUTH);
 
         return flightSearchPanel;
     }
+
 
     private void populateFlightComboBoxes(JComboBox<String> originComboBox, JComboBox<String> destinationComboBox) {
         // Obtener la lista de vuelos desde el servicio
@@ -430,13 +434,9 @@ public class MainApp {
         gbc.gridy = 3;
         flightDetailsPanel.add(departureLabel, gbc);
 
-        String departureDate = flightDTO.getDepartureDate() != null ? flightDTO.getDepartureDate().toString() : "Fecha no disponible";
-        String departureTime = flightDTO.getDepartureTime() != null ? flightDTO.getDepartureTime().toString() : "Hora no disponible";
-
-        JLabel departureValue = new JLabel(departureDate + " " + departureTime);
+        JLabel departureValue = new JLabel(flightDTO.getDepartureDate().toString() + " " + flightDTO.getDepartureTime().toString());
         gbc.gridx = 1;
         flightDetailsPanel.add(departureValue, gbc);
-
 
         JLabel priceLabel = new JLabel("Price:");
         gbc.gridx = 0;
@@ -589,12 +589,47 @@ public class MainApp {
                     String cardNumber = cardNumberField.getText();
                     String expiryDate = cardExpiryField.getText();
                     String cvv = cardCVVField.getText();
+
+                    // Validate that all fields are filled
                     if (cardNumber.isEmpty() || expiryDate.isEmpty() || cvv.isEmpty()) {
                         JOptionPane.showMessageDialog(frame, "All fields are required.", "Error", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
+
+                    // Validate card number format (16 digits for Visa/MasterCard)
+                    if (!cardNumber.matches("\\d{16}")) {
+                        JOptionPane.showMessageDialog(frame, "Invalid card number. Must be 16 digits.", "Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+
+                    // Validate card number using Luhn's algorithm
+                    if (!isValidCardNumber(cardNumber)) {
+                        JOptionPane.showMessageDialog(frame, "Invalid card number. Failed Luhn check.", "Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+
+                    // Validate expiry date format (MM/YY)
+                    if (!expiryDate.matches("(0[1-9]|1[0-2])/\\d{2}")) {
+                        JOptionPane.showMessageDialog(frame, "Invalid expiry date. Must be in MM/YY format.", "Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+
+                    // Validate that the expiry date is not in the past
+                    if (isExpired(expiryDate)) {
+                        JOptionPane.showMessageDialog(frame, "Card expired. Please use a valid card.", "Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+
+                    // Validate CVV format (3 digits for Visa/MasterCard)
+                    if (!cvv.matches("\\d{3}")) {
+                        JOptionPane.showMessageDialog(frame, "Invalid CVV. Must be 3 digits.", "Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+
+                    // Update user card details after passing all validations
                     userDetails.updateCardDetails(expiryDate, cardNumber, cvv);
                     userDetailsController.update(userDetails.getId(), toUserDetailsDTO(userDetails));
+
                     PaymentDTO paymentDTO = new PaymentDTO();
                     Long paymentNumber= paymentDTO.generatePaymentNumber();
                     if(paymentController.findByPaymentNumber(paymentNumber) != null){
@@ -606,7 +641,6 @@ public class MainApp {
                     finalPayment.setUser(currentUser);
                     finalPayment.setType(selectedMethod);
                     finalPayment.setAmountOfPayments(numberOfPayments);
-                    reservation.setPayment(finalPayment);
 
                 } else if ("Bank Transfer".equals(selectedMethod)) {
                     String bankAccount = bankAccountField.getText();
@@ -628,13 +662,29 @@ public class MainApp {
                     finalPayment.setUser(currentUser);
                     finalPayment.setType(selectedMethod);
                     finalPayment.setAmountOfPayments(numberOfPayments);
-                    reservation.setPayment(finalPayment);
+
                 }
 
                 try {
+                    // Step 1: Set reservation state and associate payment
                     reservation.setState("Booked");
+                    reservation.setPayment(finalPayment);
+
+                    // Step 2: Create the reservation and find payment
                     reservationController.createReservation(toReservationDTO(reservation));
+                    PaymentDTO payment1 = toPaymentDTO(paymentController.findByPaymentNumber(finalPayment.getNumber()));
+
+                    // Step 3: Set the reservation reference in the payment
+                    payment1.setReservation(toReservationDTO(reservationController.findByReservationNumber(reservation.getNumber())));
+
+                    // Step 4: Update payment and reservation objects
+                    paymentController.update(payment1.getId(), payment1);
+                    reservation.setPayment(dtoToPayment(payment1));
+                    reservationController.update(reservationController.findByReservationNumber(reservation.getNumber()).getId(), toReservationDTO(reservation));
+
+                    JOptionPane.showMessageDialog(frame, "Flight booked and payment successful");
                     cardLayout.show(mainPanel, "MainMenu");
+
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(frame, "Failed to process payment: " + ex.getMessage());
                 }
@@ -669,134 +719,59 @@ public class MainApp {
         mainPanel.add(flightDetailsPanel, "FlightDetails");
         cardLayout.show(mainPanel, "FlightDetails");
     }
+    private boolean isValidCardNumber(String cardNumber) {
+        int sum = 0;
+        boolean alternate = false;
+        for (int i = cardNumber.length() - 1; i >= 0; i--) {
+            int n = Integer.parseInt(cardNumber.substring(i, i + 1));
+            if (alternate) {
+                n *= 2;
+                if (n > 9) {
+                    n = (n % 10) + 1;
+                }
+            }
+            sum += n;
+            alternate = !alternate;
+        }
+        return (sum % 10 == 0);
+    }
+
+    private boolean isExpired(String expiryDate) {
+        String[] parts = expiryDate.split("/");
+        int expMonth = Integer.parseInt(parts[0]);
+        int expYear = Integer.parseInt("20" + parts[1]);  // Assuming "YY" is in the format of 20YY
+
+        // Get current month and year
+        Calendar now = Calendar.getInstance();
+        int currentYear = now.get(Calendar.YEAR);
+        int currentMonth = now.get(Calendar.MONTH) + 1;  // January is 0, so add 1
+
+        // Check if the card is expired
+        if (expYear < currentYear || (expYear == currentYear && expMonth < currentMonth)) {
+            return true;
+        }
+        return false;
+    }
 
     private JPanel createUserReservationsPanel() {
         JPanel userReservationsPanel = new JPanel(new BorderLayout());
 
         DefaultListModel<ReservationDTO> reservationListModel = new DefaultListModel<>();
-        JList<ReservationDTO> reservationList = new JList<>(reservationListModel); // Cambiado a PaymentDTO
-        JButton refreshButton = new JButton("Refresh");
-        JButton modifyButton = new JButton("Modify Reservation");
-        JButton deleteButton = new JButton("Delete Reservation");
+        JList<ReservationDTO> reservationList = new JList<>(reservationListModel);
 
-        // Botón para regresar al menú principal
-        JButton backToMainMenuButton = new JButton("Main Menu");
-        backToMainMenuButton.addActionListener(e -> cardLayout.show(mainPanel, "MainMenu"));
-
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        buttonPanel.add(refreshButton);
-        buttonPanel.add(modifyButton);
-        buttonPanel.add(deleteButton);
-        buttonPanel.add(backToMainMenuButton);
-
-        refreshButton.addActionListener(e -> {
-            // Implementar la lógica de actualización de pagos
+        // Fetch user details and load reservations
+        try {
             UserDetails userDetails = userDetailsController.findByEmail(userEmail);
             if (userDetails != null) {
-                List<ReservationDTO> reservations = reservationController.getUserReservations(userDetails.getId());
-                reservationList.setListData(reservations.toArray(new ReservationDTO[0])); // Cambiado a PaymentDTO
-            } else {
-                JOptionPane.showMessageDialog(frame, "Please log in first");
+                loadUserReservations(userDetails.getId(), reservationListModel);
             }
-        });
-
-        modifyButton.addActionListener(e -> {
-            // Obtener el pago seleccionado
-            ReservationDTO selectedReservation = reservationList.getSelectedValue(); // Cambiado a PaymentDTO
-            if (selectedReservation != null) {
-                // Abrir un diálogo o nueva ventana para modificar la reserva
-                Reservation reservation = reservationController.findByReservationNumber(selectedReservation.getId());
-                if (reservation != null) {
-                    // Llamar al método para mostrar la UI de modificación
-                    showModifyReservationDialog(reservation);
-                } else {
-                    JOptionPane.showMessageDialog(frame, "No reservation found for this payment");
-                }
-            } else {
-                JOptionPane.showMessageDialog(frame, "Please select a reservation to modify");
-            }
-        });
-
-        deleteButton.addActionListener(e -> {
-            // Obtener el pago seleccionado
-            ReservationDTO selectedreservation = reservationList.getSelectedValue(); // Cambiado a PaymentDTO
-            if (selectedreservation != null) {
-                int confirm = JOptionPane.showConfirmDialog(frame, "Are you sure you want to delete this reservation?", "Confirm Delete", JOptionPane.YES_NO_OPTION);
-                if (confirm == JOptionPane.YES_OPTION) {
-                    // Eliminar reserva
-                    reservationController.deleteReservation(selectedreservation.getId()); // Cambiado a deleteReservationById
-                    JOptionPane.showMessageDialog(frame, "Reservation deleted successfully");
-                    refreshButton.doClick(); // Actualizar la lista después de eliminar
-                }
-            } else {
-                JOptionPane.showMessageDialog(frame, "Please select a reservation to delete");
-            }
-        });
-
-        userReservationsPanel.add(buttonPanel, BorderLayout.NORTH);
-        userReservationsPanel.add(new JScrollPane(reservationList), BorderLayout.CENTER);
-
-        return userReservationsPanel;
-    }
-
-    private void showModifyReservationDialog(Reservation reservation) {
-        JDialog modifyDialog = new JDialog(frame, "Modify Reservation", true);
-        modifyDialog.setLayout(new BorderLayout());
-
-        // Campo de texto para la fecha de la reserva
-        JTextField dateField = new JTextField(reservation.getDate().toString());
-
-        // Botón para guardar los cambios
-        JButton saveButton = new JButton("Save");
-        saveButton.addActionListener(e -> {
-            try {
-                // Obtener la nueva fecha del campo de texto
-                java.sql.Date newDate = java.sql.Date.valueOf(LocalDate.parse(dateField.getText()));
-
-                // Actualizar los detalles de la reserva con los nuevos valores
-                reservation.setDate(newDate);
-
-                // Llamar al controlador para actualizar la reserva, pasando el ID y los nuevos detalles
-
-                // Mostrar un mensaje de éxito y cerrar el diálogo
-                JOptionPane.showMessageDialog(modifyDialog, "Reservation updated successfully");
-                modifyDialog.dispose();
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(modifyDialog, "Error updating reservation: " + ex.getMessage());
-            }
-        });
-
-        // Crear el formulario para los campos de la reserva
-        JPanel formPanel = new JPanel(new GridLayout(2, 2));
-        formPanel.add(new JLabel("Date:"));
-        formPanel.add(dateField);
-
-        // Agregar el formulario y el botón "Save" al diálogo
-        modifyDialog.add(formPanel, BorderLayout.CENTER);
-        modifyDialog.add(saveButton, BorderLayout.SOUTH);
-
-        // Configurar el tamaño y la posición del diálogo
-        modifyDialog.setSize(300, 200);
-        modifyDialog.setLocationRelativeTo(frame);
-        modifyDialog.setVisible(true);
-    }
-
-
-    private JPanel createUserPaymentsPanel() {
-        JPanel userPaymentsPanel = new JPanel(new BorderLayout());
-
-        DefaultListModel<PaymentDTO> paymentListModel = new DefaultListModel<>();
-        JList<PaymentDTO> paymentList = new JList<>(paymentListModel);
-        UserDetails userDetails = userDetailsController.findByEmail(userEmail);
-        if (userDetails != null) {
-            List<PaymentDTO> payments = paymentController.getUserPayments(userDetails.getId());
-            for (PaymentDTO payment : payments) {
-                paymentListModel.addElement(payment);
-            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(frame, "Error loading reservations: " + ex.getMessage());
+            ex.printStackTrace();
         }
-        JButton refreshButton = new JButton("Refresh");
 
-        // Add back to main menu button
+        // Add refresh and main menu buttons
+        JButton refreshButton = new JButton("Refresh");
         JButton backToMainMenuButton = new JButton("Main Menu");
         backToMainMenuButton.addActionListener(e -> cardLayout.show(mainPanel, "MainMenu"));
 
@@ -808,49 +783,217 @@ public class MainApp {
             try {
                 UserDetails userDetails1 = userDetailsController.findByEmail(userEmail);
                 if (userDetails1 != null) {
-                    List<PaymentDTO> payments = paymentController.getUserPayments(userDetails1.getId());
-                    paymentListModel.clear(); // Limpiar listomasta existente
-                    for (PaymentDTO payment : payments) {
-                        paymentListModel.addElement(payment); // Agregar pagos a la lista
+                    loadUserReservations(userDetails1.getId(), reservationListModel);
+                }
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(frame, "Error loading reservations: " + ex.getMessage());
+                ex.printStackTrace();
+            }
+        });
+
+        // Set custom cell renderer to divide each reservation into its own container
+        reservationList.setCellRenderer((list, value, index, isSelected, cellHasFocus) -> {
+            JPanel reservationPanel = new JPanel(new GridBagLayout());
+            GridBagConstraints gbc = new GridBagConstraints();
+            gbc.insets = new Insets(5, 5, 5, 5);  // Padding
+            gbc.fill = GridBagConstraints.HORIZONTAL;
+
+            // Set border around each reservation to visually separate them
+            reservationPanel.setBorder(BorderFactory.createTitledBorder("Reservation Details"));
+
+            // Display Reservation Number
+            gbc.gridx = 0;
+            gbc.gridy = 0;
+            reservationPanel.add(new JLabel("Reservation Number:"), gbc);
+
+            gbc.gridx = 1;
+            reservationPanel.add(new JLabel(String.valueOf(value.getNumber())), gbc);
+
+            // Display Flight Number (if available)
+            gbc.gridx = 0;
+            gbc.gridy = 1;
+            reservationPanel.add(new JLabel("Flight Number:"), gbc);
+
+            if (value.getFlight() != null) {
+                gbc.gridx = 1;
+                reservationPanel.add(new JLabel(value.getFlight().getFlightNum()), gbc);
+            } else {
+                gbc.gridx = 1;
+                reservationPanel.add(new JLabel("N/A"), gbc);
+            }
+
+            // Display Reservation Date
+            gbc.gridx = 0;
+            gbc.gridy = 2;
+            reservationPanel.add(new JLabel("Reservation Date:"), gbc);
+
+            gbc.gridx = 1;
+            reservationPanel.add(new JLabel(value.getDate().toString()), gbc);
+
+            // Display Reservation State
+            gbc.gridx = 0;
+            gbc.gridy = 3;
+            reservationPanel.add(new JLabel("Reservation State:"), gbc);
+
+            gbc.gridx = 1;
+            reservationPanel.add(new JLabel(value.getState()), gbc);
+
+            // Highlight selected reservation
+            if (isSelected) {
+                reservationPanel.setBackground(list.getSelectionBackground());
+                reservationPanel.setForeground(list.getSelectionForeground());
+            } else {
+                reservationPanel.setBackground(list.getBackground());
+                reservationPanel.setForeground(list.getForeground());
+            }
+
+            return reservationPanel;
+        });
+
+        userReservationsPanel.add(buttonPanel, BorderLayout.NORTH);
+        userReservationsPanel.add(new JScrollPane(reservationList), BorderLayout.CENTER);
+
+        return userReservationsPanel;
+    }
+
+    private void loadUserReservations(Long userId, DefaultListModel<ReservationDTO> reservationListModel) {
+        SwingWorker<List<ReservationDTO>, Void> worker = new SwingWorker<>() {
+            @Override
+            protected List<ReservationDTO> doInBackground() throws Exception {
+                return reservationController.getUserReservations(userId);
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    List<ReservationDTO> reservations = get();
+                    reservationListModel.clear();
+                    for (ReservationDTO reservation : reservations) {
+                        reservationListModel.addElement(reservation);
                     }
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(frame, "Error loading reservations: " + e.getMessage());
+                }
+            }
+        };
+        worker.execute();  // Start the background task
+    }
+
+    private JPanel createUserPaymentsPanel() {
+        JPanel userPaymentsPanel = new JPanel(new BorderLayout());
+
+        DefaultListModel<PaymentDTO> paymentListModel = new DefaultListModel<>();
+        JList<PaymentDTO> paymentList = new JList<>(paymentListModel);
+
+        // Fetch user details and load payments
+        try {
+            UserDetails userDetails = userDetailsController.findByEmail(userEmail);
+            if (userDetails != null) {
+                loadUserPayments(userDetails.getId(), paymentListModel);
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(frame, "Error loading payments: " + ex.getMessage());
+            ex.printStackTrace();
+        }
+
+        // Add refresh and main menu buttons
+        JButton refreshButton = new JButton("Refresh");
+        JButton backToMainMenuButton = new JButton("Main Menu");
+        backToMainMenuButton.addActionListener(e -> cardLayout.show(mainPanel, "MainMenu"));
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        buttonPanel.add(refreshButton);
+        buttonPanel.add(backToMainMenuButton);
+
+        refreshButton.addActionListener(e -> {
+            try {
+                UserDetails userDetails1 = userDetailsController.findByEmail(userEmail);
+                if (userDetails1 != null) {
+                    loadUserPayments(userDetails1.getId(), paymentListModel);
                 } else {
                     JOptionPane.showMessageDialog(frame, "Please log in first");
                 }
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(frame, "Error loading payments: " + ex.getMessage());
-                ex.printStackTrace(); // Para el desarrollo, puedes registrar el error
+                ex.printStackTrace();
             }
         });
 
+        // Set custom cell renderer to divide each payment into its own container
         paymentList.setCellRenderer((list, value, index, isSelected, cellHasFocus) -> {
-                    Reservation reservation=  dtoToReservation(reservationController.getReservationById(value.getId()));
-                    JPanel panel = new JPanel(new GridLayout(1, 4));
-                    JLabel numLabel = new JLabel("Payment number: " + value.getNumber());
-                    JLabel typeLabel = new JLabel("Type: " + value.getType());
-                    JLabel amountLabel = new JLabel("Amount of payments : " + value.getAmountOfPayments());
-                    JLabel reservationLabel = new JLabel("Reservation number: " + reservation.getNumber());
+            JPanel paymentPanel = new JPanel(new GridBagLayout());
+            GridBagConstraints gbc = new GridBagConstraints();
+            gbc.insets = new Insets(5, 5, 5, 5);  // Padding
+            gbc.fill = GridBagConstraints.HORIZONTAL;
 
-                    panel.add(numLabel);
-                    panel.add(typeLabel);
-                    panel.add(amountLabel);
-                    panel.add(reservationLabel);
+            // Set border around each payment to visually separate them
+            paymentPanel.setBorder(BorderFactory.createTitledBorder("Payment Details"));
 
-                    if (isSelected) {
-                        panel.setBackground(list.getSelectionBackground());
-                        panel.setForeground(list.getSelectionForeground());
-                    } else {
-                        panel.setBackground(list.getBackground());
-                        panel.setForeground(list.getForeground());
-                    }
+            // Display Payment Number
+            gbc.gridx = 0;
+            gbc.gridy = 0;
+            paymentPanel.add(new JLabel("Payment Number:"), gbc);
 
-                    return panel;
-                });
+            gbc.gridx = 1;
+            paymentPanel.add(new JLabel(String.valueOf(value.getNumber())), gbc);
+
+            // Display Payment Type
+            gbc.gridx = 0;
+            gbc.gridy = 1;
+            paymentPanel.add(new JLabel("Payment Type:"), gbc);
+
+            gbc.gridx = 1;
+            paymentPanel.add(new JLabel(value.getType()), gbc);
+
+            // Display Payment Amount
+            gbc.gridx = 0;
+            gbc.gridy = 2;
+            paymentPanel.add(new JLabel("Amount of Payments:"), gbc);
+
+            gbc.gridx = 1;
+            paymentPanel.add(new JLabel(String.valueOf(value.getAmountOfPayments())), gbc);
+
+            // Highlight selected payment
+            if (isSelected) {
+                paymentPanel.setBackground(list.getSelectionBackground());
+                paymentPanel.setForeground(list.getSelectionForeground());
+            } else {
+                paymentPanel.setBackground(list.getBackground());
+                paymentPanel.setForeground(list.getForeground());
+            }
+
+            return paymentPanel;
+        });
+
         userPaymentsPanel.add(buttonPanel, BorderLayout.NORTH);
         userPaymentsPanel.add(new JScrollPane(paymentList), BorderLayout.CENTER);
 
-
         return userPaymentsPanel;
     }
+
+    private void loadUserPayments(Long userId, DefaultListModel<PaymentDTO> paymentListModel) {
+        SwingWorker<List<PaymentDTO>, Void> worker = new SwingWorker<>() {
+            @Override
+            protected List<PaymentDTO> doInBackground() throws Exception {
+                return paymentController.getUserPayments(userId);
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    List<PaymentDTO> payments = get();
+                    paymentListModel.clear();
+                    for (PaymentDTO payment : payments) {
+                        paymentListModel.addElement(payment);
+                    }
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(frame, "Error loading payments: " + e.getMessage());
+                }
+            }
+        };
+        worker.execute();  // Start the background task
+    }
+
     public class SeatSelectionPanel extends JPanel {
         private JButton[][] seatButtons;
         private String selectedSeat;

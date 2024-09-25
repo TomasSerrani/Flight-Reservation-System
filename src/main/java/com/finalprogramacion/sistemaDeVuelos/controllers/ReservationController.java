@@ -1,12 +1,15 @@
 package com.finalprogramacion.sistemaDeVuelos.controllers;
 
 import com.finalprogramacion.sistemaDeVuelos.collectors.EntityAndDTOConverter;
+import com.finalprogramacion.sistemaDeVuelos.models.dtos.PaymentDTO;
 import com.finalprogramacion.sistemaDeVuelos.models.dtos.ReservationDTO;
+import com.finalprogramacion.sistemaDeVuelos.models.entities.Payment;
 import com.finalprogramacion.sistemaDeVuelos.models.entities.Reservation;
 import com.finalprogramacion.sistemaDeVuelos.models.services.ReservationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -48,14 +51,17 @@ public class ReservationController {
         return ResponseEntity.status(HttpStatus.CREATED).body(reservationDTO);
     }
 
+    @Transactional
     @PutMapping("/{id}")
-    public ResponseEntity<ReservationDTO> updateReservation(@PathVariable Long id, @RequestBody ReservationDTO reservationDetails) {
-        Reservation updatedReservation = dtoToReservation(reservationDetails);
-        reservationService.updateReservation(id, updatedReservation);
-        if (reservationService.getReservationById(id) != null) {
-            return ResponseEntity.ok(reservationDetails);
-        }
-        return ResponseEntity.notFound().build();
+    public ReservationDTO update(@PathVariable Long id,@PathVariable ReservationDTO reservationDTO) {
+        Reservation existingReservation = reservationService.getReservationById(id);
+        if (existingReservation != null) {
+            Reservation updatedReservation = dtoToReservation(reservationDTO);
+            updatedReservation.setId(id);
+            reservationService.updateReservation(id, updatedReservation);
+            return toReservationDTO(updatedReservation);
+        };
+        return null;
     }
 
     @DeleteMapping("/{id}")
@@ -70,4 +76,6 @@ public class ReservationController {
     public Reservation findByReservationNumber(Long reservationNumber){
         return reservationService.getByReservationNumber(reservationNumber);
     }
+
+
 }
