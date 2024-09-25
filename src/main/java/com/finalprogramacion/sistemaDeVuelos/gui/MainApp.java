@@ -534,7 +534,7 @@ public class MainApp {
 
         JLabel passengersLabel = new JLabel("Passengers:");
         passengersLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        JSpinner passengersSpinner = new JSpinner(new SpinnerNumberModel(1, 1, 10, 1));  // Min: 1, Max: 10 passengers
+        JSpinner passengersSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 10, 1));  // Min: 1, Max: 10 passengers
 
         JButton searchButton = new JButton("Search");
         searchButton.setFont(new Font("Segoe UI", Font.BOLD, 14));

@@ -89,8 +89,13 @@ public class FlightService {
         List<Flight> matchingFlights = flightRepository.findByOriginAndDestinationAndDepartureDate(origin1, destination1, parsedDepartureDate);
 
         // Filter flights that have enough available seats for the given number of passengers
-        List<Flight> availableFlights = matchingFlights.stream()
-                .filter(flight -> flight.getAvailableSeats() >= passengers).toList();
+        List<Flight> availableFlights;
+        if (passengers >0 ){
+            availableFlights = matchingFlights.stream()
+                    .filter(flight -> flight.getAvailableSeats() >= passengers).toList();
+        } else {
+            availableFlights = matchingFlights.stream().toList();
+        }
 
         return availableFlights;
     }
