@@ -1083,9 +1083,32 @@ public class MainApp {
         buttonPanel.add(deleteButton, gbc);
         gbc.gridx= 5;
         buttonPanel.add(createBackButton(), gbc);
+        // Check-in button
+        JButton checkInButton = new JButton("Check-in");
+        checkInButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        checkInButton.setBackground(new Color(34, 139, 34)); // Green for check-in
+        checkInButton.setForeground(Color.WHITE);
+        checkInButton.setFocusPainted(false);
+
+        gbc.gridx = 5;
+        buttonPanel.add(checkInButton, gbc);
+
+        // Back button
+        gbc.gridx = 6;
+        buttonPanel.add(createBackButton(), gbc);
 
         // Add button panel to the top of the userReservationsPanel
         userReservationsPanel.add(buttonPanel, BorderLayout.NORTH);
+
+        // Acción del botón de Check-in
+        checkInButton.addActionListener(e -> {
+            ReservationDTO selectedReservation = reservationList.getSelectedValue(); // Obtener la reserva seleccionada
+            if (selectedReservation != null) {
+                performCheckIn(selectedReservation);  // Llamar al método performCheckIn
+            } else {
+                JOptionPane.showMessageDialog(frame, "Please select a reservation for Check-in.");
+            }
+        });
 
         // Refresh button action
         refreshButton.addActionListener(e -> {
@@ -1195,6 +1218,46 @@ public class MainApp {
         userReservationsPanel.add(scrollPane, BorderLayout.CENTER);
 
         return userReservationsPanel;
+    }
+    private void performCheckIn(ReservationDTO reservation) {
+        // Verificar si el estado de la reserva permite Check-in
+        if (!reservation.getState().equals("Booked")) {
+            JOptionPane.showMessageDialog(frame, "Only booked reservations can be checked in.");
+            return;
+        }
+
+        // Generar código de embarque
+        String boardingPassCode = generateBoardingPassCode();
+
+        // Actualizar el estado de la reserva a "Checked-in"
+        reservation.setState("Checked-in");
+        reservationController.updateReservationState(reservation.getNumber(), "Checked-in");
+
+        // Mostrar tarjeta de embarque
+        showBoardingPass(reservation, boardingPassCode);
+    }
+
+    // Genera un código de embarque único
+    private String generateBoardingPassCode() {
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        StringBuilder boardingPassCode = new StringBuilder();
+        Random random = new Random();
+        for (int i = 0; i < 8; i++) {
+            boardingPassCode.append(characters.charAt(random.nextInt(characters.length())));
+        }
+        return boardingPassCode.toString();
+    }
+
+    // Muestra la tarjeta de embarque en un JOptionPane
+    private void showBoardingPass(ReservationDTO reservation, String boardingPassCode) {
+        JPanel boardingPassPanel = new JPanel(new GridLayout(0, 1));
+        boardingPassPanel.add(new JLabel("Boarding Pass"));
+        boardingPassPanel.add(new JLabel("Reservation Number: " + reservation.getNumber()));
+        boardingPassPanel.add(new JLabel("Flight Number: " + reservation.getFlight().getFlightNum()));
+        boardingPassPanel.add(new JLabel("Passenger Count: " + reservation.getFlight().getPassengerCount()));
+        boardingPassPanel.add(new JLabel("Boarding Pass Code: " + boardingPassCode));
+
+        JOptionPane.showMessageDialog(frame, boardingPassPanel, "Boarding Pass", JOptionPane.INFORMATION_MESSAGE);
     }
 
 

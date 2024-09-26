@@ -77,6 +77,17 @@ public class ReservationController {
     public Reservation findByReservationNumber(Long reservationNumber){
         return reservationService.getByReservationNumber(reservationNumber);
     }
+    @PutMapping("/update-state/{reservationNumber}")
+    public ResponseEntity<Void> updateReservationState(@PathVariable Long reservationNumber, @RequestBody String newState) {
+        Reservation reservation = reservationService.getByReservationNumber(reservationNumber);
+        if (reservation != null) {
+            reservation.setState(newState);
+            reservationService.updateReservation(reservationNumber, reservation);
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
+
 
     public void updateReservation(Long number, Date newDate, int newPassengerCount) {
     }
