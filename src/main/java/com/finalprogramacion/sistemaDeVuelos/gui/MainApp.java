@@ -274,6 +274,7 @@ public class MainApp {
         gbc.anchor = GridBagConstraints.WEST;
         JButton backButton = new JButton("Back");  // Reemplazamos el método con el botón directamente
         backButton.setBackground(new Color(70, 130, 180));
+        backButton.setForeground(Color.WHITE);
         backButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
         backButton.addActionListener(e -> cardLayout.show(mainPanel, "Login"));  // Cambiamos a la pantalla de Login
         registerPanel.add(backButton, gbc);
@@ -1063,7 +1064,7 @@ public class MainApp {
         gbc.gridy = 0;
         buttonPanel.add(sortByLabel, gbc);
 
-        String[] sortingOptions = {"Date (Closest)", "Date (Furthest)", "Passengers (Most)", "Passengers (Least)"};
+        String[] sortingOptions = {"Date (Closest)", "Passengers (Most)", "Passengers (Least)"};
         JComboBox<String> sortingComboBox = new JComboBox<>(sortingOptions);
         sortingComboBox.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         gbc.gridx = 1;
@@ -1336,9 +1337,6 @@ public class MainApp {
                 switch (sortBy) {
                     case "Date (Closest)":
                         reservations.sort(Comparator.comparing(ReservationDTO::getDate));
-                        break;
-                    case "Date (Furthest)":
-                        reservations.sort(Comparator.comparing(ReservationDTO::getDate).reversed());
                         break;
                     case "Passengers (Most)":
                         reservations.sort(Comparator.comparingInt(reservation -> {
