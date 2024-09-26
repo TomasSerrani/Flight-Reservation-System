@@ -55,6 +55,8 @@ public class MainApp {
         reservationController = context.getBean(ReservationController.class);
         paymentController = context.getBean(PaymentController.class);
         userDetailsController = context.getBean(UserDetailsController.class);
+        passengerController = context.getBean(PassengerController.class);
+
     }
     private void setupUI() {
         frame = new JFrame("Flight Reservation System");
