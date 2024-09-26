@@ -687,10 +687,13 @@ public class MainApp {
         gbc.gridy = 3;
         flightDetailsPanel.add(departureLabel, gbc);
 
-        JLabel departureValue = new JLabel(flightDTO.getDepartureDate().toString() + " " + flightDTO.getDepartureTime().toString());
+        String departureDate = (flightDTO.getDepartureDate() != null) ? flightDTO.getDepartureDate().toString() : "Fecha no disponible";
+        String departureTime = (flightDTO.getDepartureTime() != null) ? flightDTO.getDepartureTime().toString() : "Hora no disponible";
+
+        // Mostrar la fecha y hora
+        JLabel departureValue = new JLabel(departureDate + " " + departureTime);
         gbc.gridx = 1;
         flightDetailsPanel.add(departureValue, gbc);
-
         JLabel priceLabel = new JLabel("Price:");
         gbc.gridx = 0;
         gbc.gridy = 4;
