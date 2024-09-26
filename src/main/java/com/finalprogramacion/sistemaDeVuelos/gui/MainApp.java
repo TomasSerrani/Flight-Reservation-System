@@ -97,7 +97,7 @@ public class MainApp {
 
         JButton loginButton = new JButton("Login");
         loginButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        loginButton.setBackground(new Color(205, 205, 205));
+        loginButton.setBackground(new Color(70, 130, 180));
         loginButton.setForeground(Color.WHITE);
         loginButton.setFocusPainted(false);
 
@@ -1096,30 +1096,28 @@ public class MainApp {
         gbc.gridx = 4;
         buttonPanel.add(deleteButton, gbc);
 
-        // Main Menu button (we'll keep only one)
+        // Check-in button
+        JButton checkInButton = new JButton("Check-in");
+        checkInButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        checkInButton.setBackground(new Color(34, 139, 34)); // Green for check-in
+        checkInButton.setForeground(Color.WHITE);
+        checkInButton.setFocusPainted(false);
+        gbc.gridx = 5;
+        buttonPanel.add(checkInButton, gbc);
+
+        // Main Menu button (for returning to main menu)
         JButton mainMenuButton = new JButton("Main Menu");
         mainMenuButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        mainMenuButton.setBackground(new Color(70, 130, 180)); // Gold for Main Menu
+        mainMenuButton.setBackground(new Color(70, 130, 180));
         mainMenuButton.setForeground(Color.WHITE);
         mainMenuButton.setFocusPainted(false);
-        gbc.gridx = 5;
+        gbc.gridx = 6;
         buttonPanel.add(mainMenuButton, gbc);
 
         // Add button panel to the top of the userReservationsPanel
         userReservationsPanel.add(buttonPanel, BorderLayout.NORTH);
 
-        // Declarar e inicializar el botón Check-in
-        JButton checkInButton = new JButton("Check-in");
-        checkInButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        checkInButton.setBackground(new Color(34, 139, 34)); // Color verde
-        checkInButton.setForeground(Color.WHITE);
-        checkInButton.setFocusPainted(false);
-
-        // Añadir el botón al panel
-        gbc.gridx = 5;
-        buttonPanel.add(checkInButton, gbc);
-
-        // Acción del botón de Check-in
+        // Check-in button action
         checkInButton.addActionListener(e -> {
             ReservationDTO selectedReservation = reservationList.getSelectedValue(); // Obtener la reserva seleccionada
             if (selectedReservation != null) {
@@ -1129,13 +1127,11 @@ public class MainApp {
             }
         });
 
-
         // Refresh button action
         refreshButton.addActionListener(e -> {
             try {
                 UserDetails userDetails1 = userDetailsController.findByEmail(userEmail);
                 if (userDetails1 != null) {
-                    // Load reservations with selected sorting option
                     String selectedSortOption = (String) sortingComboBox.getSelectedItem();
                     boolean ascending = !selectedSortOption.equals("Date (Furthest)");  // Ascending for "Date (Closest)"
                     loadUserReservations(userDetails1.getId(), reservationListModel, selectedSortOption, ascending);
@@ -1245,7 +1241,7 @@ public class MainApp {
         return userReservationsPanel;
     }
 
-
+    // Método de Check-in
     private void performCheckIn(ReservationDTO reservation) {
         // Verificar si el estado de la reserva permite Check-in
         if (!reservation.getState().equals("Booked")) {
