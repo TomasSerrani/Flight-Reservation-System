@@ -97,7 +97,7 @@ public class MainApp {
 
         JButton loginButton = new JButton("Login");
         loginButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        loginButton.setBackground(new Color(70, 130, 180));
+        loginButton.setBackground(new Color(205, 205, 205));
         loginButton.setForeground(Color.WHITE);
         loginButton.setFocusPainted(false);
 
@@ -272,7 +272,10 @@ public class MainApp {
         gbc.gridy = 0;
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.WEST;
-        JButton backButton = createBackToRegisterButton();
+        JButton backButton = new JButton("Back");  // Reemplazamos el método con el botón directamente
+        backButton.setBackground(new Color(70, 130, 180));
+        backButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        backButton.addActionListener(e -> cardLayout.show(mainPanel, "Login"));  // Cambiamos a la pantalla de Login
         registerPanel.add(backButton, gbc);
 
         // Name label and field
@@ -390,6 +393,7 @@ public class MainApp {
 
         return registerPanel;
     }
+
 
     public String requestPasswordRecovery(String email) {
         // Check if the email exists in the system
@@ -610,11 +614,15 @@ public class MainApp {
 
         // "Main Menu" button
         JButton mainMenuButton = new JButton("Main Menu");
+        mainMenuButton.setBackground(new Color(70, 130, 180)); // Fondo azul
+        mainMenuButton.setForeground(Color.WHITE); // Letras blancas
         mainMenuButton.addActionListener(e -> cardLayout.show(mainPanel, "MainMenu"));
         bottomPanel.add(mainMenuButton);
 
-        // "Select Flight" button
+// "Select Flight" button
         JButton selectFlightButton = new JButton("Select Flight");
+        selectFlightButton.setBackground(new Color(70, 130, 180)); // Fondo azul
+        selectFlightButton.setForeground(Color.WHITE); // Letras blancas
         selectFlightButton.addActionListener(e -> {
             FlightDTO selectedFlight = flightList.getSelectedValue();
             if (selectedFlight != null) {
@@ -705,6 +713,8 @@ public class MainApp {
 
         // Botón de reserva
         JButton bookButton = new JButton("Book");
+        bookButton.setBackground(new Color(70, 130, 180));
+        bookButton.setForeground(Color.WHITE);
         bookButton.putClientProperty("flightDTO", flightDTO);
         gbc.gridx = 0;
         gbc.gridy = 5;
@@ -823,6 +833,8 @@ public class MainApp {
 
             // Agregar botón de envío de pago
             JButton submitPaymentButton = new JButton("Submit Payment");
+            submitPaymentButton.setBackground(new Color(70, 130, 180));
+            submitPaymentButton.setForeground(Color.WHITE);
             paymentGbc.gridy = 4;
             paymentGbc.gridwidth = 2;
             paymentGbc.anchor = GridBagConstraints.CENTER;
@@ -932,8 +944,6 @@ public class MainApp {
                     passengerDTO.setFlight(flightDTO);
                     passengerController.save(passengerDTO);
 
-
-
                     // Step 2: Create the reservation and find payment
                     reservationController.createReservation(toReservationDTO(reservation));
                     PaymentDTO payment1 = toPaymentDTO(paymentController.findByPaymentNumber(finalPayment.getNumber()));
@@ -964,6 +974,8 @@ public class MainApp {
 
             // Aquí añadimos el botón de retroceso
             JButton backButton = new JButton("<- Back");
+            backButton.setBackground(new Color(70, 130, 180));
+            backButton.setForeground(Color.WHITE);
             paymentGbc.gridy = 5;
             paymentGbc.gridwidth = 2;
             paymentGbc.anchor = GridBagConstraints.CENTER;
@@ -973,6 +985,8 @@ public class MainApp {
         });
 
         JButton backButton = new JButton("<- Back");
+        backButton.setBackground(new Color(70, 130, 180));
+        backButton.setForeground(Color.WHITE);
         gbc.gridx = 0;
         gbc.gridy = 6;
         gbc.gridwidth = 2;
@@ -1081,24 +1095,29 @@ public class MainApp {
         deleteButton.setFocusPainted(false);
         gbc.gridx = 4;
         buttonPanel.add(deleteButton, gbc);
-        gbc.gridx= 5;
-        buttonPanel.add(createBackButton(), gbc);
-        // Check-in button
-        JButton checkInButton = new JButton("Check-in");
-        checkInButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        checkInButton.setBackground(new Color(34, 139, 34)); // Green for check-in
-        checkInButton.setForeground(Color.WHITE);
-        checkInButton.setFocusPainted(false);
 
+        // Main Menu button (we'll keep only one)
+        JButton mainMenuButton = new JButton("Main Menu");
+        mainMenuButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        mainMenuButton.setBackground(new Color(70, 130, 180)); // Gold for Main Menu
+        mainMenuButton.setForeground(Color.WHITE);
+        mainMenuButton.setFocusPainted(false);
         gbc.gridx = 5;
-        buttonPanel.add(checkInButton, gbc);
-
-        // Back button
-        gbc.gridx = 6;
-        buttonPanel.add(createBackButton(), gbc);
+        buttonPanel.add(mainMenuButton, gbc);
 
         // Add button panel to the top of the userReservationsPanel
         userReservationsPanel.add(buttonPanel, BorderLayout.NORTH);
+
+        // Declarar e inicializar el botón Check-in
+        JButton checkInButton = new JButton("Check-in");
+        checkInButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        checkInButton.setBackground(new Color(34, 139, 34)); // Color verde
+        checkInButton.setForeground(Color.WHITE);
+        checkInButton.setFocusPainted(false);
+
+        // Añadir el botón al panel
+        gbc.gridx = 5;
+        buttonPanel.add(checkInButton, gbc);
 
         // Acción del botón de Check-in
         checkInButton.addActionListener(e -> {
@@ -1109,6 +1128,7 @@ public class MainApp {
                 JOptionPane.showMessageDialog(frame, "Please select a reservation for Check-in.");
             }
         });
+
 
         // Refresh button action
         refreshButton.addActionListener(e -> {
@@ -1145,6 +1165,11 @@ public class MainApp {
             } else {
                 JOptionPane.showMessageDialog(frame, "Please select a reservation to delete.");
             }
+        });
+
+        // Main Menu button action
+        mainMenuButton.addActionListener(e -> {
+            cardLayout.show(mainPanel, "MainMenu"); // Cambiar al panel del menú principal
         });
 
         // Custom renderer for reservation list
@@ -1219,6 +1244,8 @@ public class MainApp {
 
         return userReservationsPanel;
     }
+
+
     private void performCheckIn(ReservationDTO reservation) {
         // Verificar si el estado de la reserva permite Check-in
         if (!reservation.getState().equals("Booked")) {
