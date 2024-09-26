@@ -1437,12 +1437,16 @@ public class MainApp {
         private JButton[][] seatButtons;
         private String selectedSeat;
         private FlightDTO flightDTO;
+        private MainApp mainApp; // Referencia a MainApp para navegar entre paneles
 
-        public SeatSelectionPanel(FlightDTO flightDTO) {
+        // Constructor que recibe FlightDTO y MainApp
+        public SeatSelectionPanel(FlightDTO flightDTO, MainApp mainApp) {
             this.flightDTO = flightDTO;
+            this.mainApp = mainApp; // Guardar referencia a la aplicación principal
             initializeUI();
         }
 
+        // Inicializar la interfaz gráfica
         private void initializeUI() {
             setLayout(new BorderLayout());
 
@@ -1479,6 +1483,7 @@ public class MainApp {
             add(confirmButton, BorderLayout.SOUTH);
         }
 
+        // Listener para seleccionar asiento
         private class SeatSelectionListener implements ActionListener {
             private String seatLabel;
 
@@ -1493,16 +1498,31 @@ public class MainApp {
             }
         }
 
+        // Confirmar la selección del asiento y proceder al pago
         private void confirmSeatSelection() {
             if (selectedSeat != null) {
-                // Reservar el asiento y proceder al siguiente paso (por ejemplo, proceso de pago)
-                flightDTO.reserveSeat(selectedSeat);
+                flightDTO.reserveSeat(selectedSeat); // Reservar el asiento
                 JOptionPane.showMessageDialog(this, "Asiento " + selectedSeat + " reservado. Proceder al pago.");
-                // Aquí se puede continuar al panel de pago, según la lógica de tu aplicación
+
+                // Navegar al panel de pago, pasando el FlightDTO actualizado
+                mainApp.showPaymentPanel(flightDTO);
             } else {
                 JOptionPane.showMessageDialog(this, "Por favor selecciona un asiento.");
             }
         }
+    }
+    // Método para mostrar el panel de selección de asientos
+    public void showSeatSelectionPanel(FlightDTO flightDTO) {
+        SeatSelectionPanel seatSelectionPanel = new SeatSelectionPanel(flightDTO, this);
+        mainPanel.add(seatSelectionPanel, "SeatSelection");
+        cardLayout.show(mainPanel, "SeatSelection");
+    }
+
+    // Método para mostrar el panel de pago después de la selección de asientos
+    public void showPaymentPanel(FlightDTO flightDTO) {
+        JPanel paymentPanel = createUserPaymentsPanel();
+        mainPanel.add(paymentPanel, "Payment");
+        cardLayout.show(mainPanel, "Payment");
     }
     public static void main(String[] args) {
         SwingUtilities.invokeLater(MainApp::new);
